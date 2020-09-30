@@ -1,1 +1,2 @@
-# Apuntes y tps de algoritmos y programacion II - 9515 - Curso Buchwald
+# Algo II - 9515 - Buchwald  
+apuntes, ejercitacion y cosas varias.
