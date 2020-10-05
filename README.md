@@ -1,2 +1,2 @@
-# Algo II - 9515 - Buchwald  
-apuntes, ejercitacion y cosas varias.
+# Algo II + 7541 - 9515 - Curso Buchwald  
+apuntes, entregas, ejercitacion y cosas varias.
