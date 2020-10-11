@@ -18,14 +18,10 @@ int maximo(int vector[], int n) {
     
     int index = 0;
 
-    int max = vector[0];
-
-    for (int i = 1; i < n; i++) {
-        if (max < vector[i]){
-            max = vector[i];
+    for (int i = 1; i < n; i++)
+        if (vector[index] < vector[i])
             index = i;
-        }
-    }
+
     return index;
 }
 
@@ -35,32 +31,31 @@ int maximo(int vector[], int n) {
 int comparar(int vector1[], int n1, int vector2[], int n2) {
     int min = n2 > n1 ? n1 : n2;
     int i = 0;
-    while (i < min && vector1[i] == vector2[i])
+    while (i < min){
+        if (vector1[i] < vector2[i])
+            return -1;
+        if (vector1[i] > vector2[i])
+            return 1;
         i++;
+    }
     if (n1 == i && n2 == i)
         return 0;
     if (n1 == i)
         return -1;
     if (n2 == i)
         return 1;
-    if (vector1[i] < vector2[i])
-        return -1;
-    if (vector1[i] > vector2[i])
-        return 1;
     return 0;
 }
 
-// hago una funcion wrapper para que sea un poco mas sencillo. 
-void _insertar_ordenado(int vec[], int i){
-    int v = vec[i];
-    int j = i - 1;
-    while (j >= 0 && vec[j] > v){
-        vec[j + 1] = vec[j];
-        j--;
-    }
-    vec[j + 1] = v;
-}
-void seleccion(int vector[], int n) {
-    for (int i = 1; i < n; i++)
-        _insertar_ordenado(vector, i);
-}
+
+void seleccion(int vector[], int n) { 
+    int i, j, min; 
+    for (i = 0; i < n-1; i++) { 
+        min = i; 
+        for (j = i + 1; j < n; j++) 
+            if (vector[j] < vector[min]) 
+                min = j; 
+
+        swap(vector + min, vector + i); 
+    } 
+} 
