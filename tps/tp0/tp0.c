@@ -30,13 +30,12 @@ int maximo(int vector[], int n) {
 // Pero realmente, no se me ocurrio.
 int comparar(int vector1[], int n1, int vector2[], int n2) {
     int min = n2 > n1 ? n1 : n2;
-    int i = 0;
-    while (i < min){
+    size_t i;
+    for (i = 0; i < min; i++) {
         if (vector1[i] < vector2[i])
             return -1;
         if (vector1[i] > vector2[i])
             return 1;
-        i++;
     }
     if (n1 == i && n2 == i)
         return 0;
@@ -49,13 +48,9 @@ int comparar(int vector1[], int n1, int vector2[], int n2) {
 
 
 void seleccion(int vector[], int n) { 
-    int i, j, min; 
-    for (i = 0; i < n-1; i++) { 
-        min = i; 
-        for (j = i + 1; j < n; j++) 
-            if (vector[j] < vector[min]) 
-                min = j; 
-
-        swap(vector + min, vector + i); 
-    } 
+    int i, max;
+    for (i = n; i > 0; i--) {             
+        max = maximo(vector, i);
+        swap(vector + i - 1, vector + max);
+    }
 } 
