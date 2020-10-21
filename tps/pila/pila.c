@@ -23,13 +23,13 @@ struct pila {
 pila_t *pila_crear(void){
     pila_t *p = malloc(sizeof(pila_t));
     if (p == NULL) return NULL;
-    p->cantidad = 0;
-    p->datos = 0;
     p->datos = malloc(sizeof(void *) * SIZE_BASE);
     if (p->datos == NULL) {
         free(p);
         return NULL;
     }
+    p->cantidad = 0;
+    p->capacidad = SIZE_BASE;
     return p;
 }
 
@@ -40,7 +40,7 @@ void pila_destruir(pila_t *pila){
 }
 
 bool pila_esta_vacia(const pila_t *pila){
-    return pila->cantidad;
+    return (pila->cantidad == 0) ? true : false;
 }
 
 bool pila_apilar(pila_t *pila, void *valor){

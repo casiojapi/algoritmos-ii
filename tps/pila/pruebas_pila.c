@@ -1,12 +1,15 @@
 #include "pila.h"
 #include "testing.h"
 
-#define NULL (void *)0
+#include <stdlib.h>
+
+#define TEST_ELEM 1618033
 
 static void prueba_pila_vacia(void) {
     pila_t *p = pila_crear();
     print_test("la pila fue creada", p != NULL);
     print_test("la pila esta vacia", pila_esta_vacia(p));
+    pila_destruir(p);
 }
 
 static void prueba_crear_destruir(void) {
@@ -16,14 +19,19 @@ static void prueba_crear_destruir(void) {
 
 static void prueba_apilar_desapilar(void) {
     pila_t *p = pila_crear();
-    int *elem;
-    
-
+    int *elem = malloc(sizeof(int));
+    *elem = TEST_ELEM;
+    pila_apilar(p, elem);
+    int *test = malloc(sizeof())
+    print_test("apila int *?", (int *)pila_desapilar(p) == *elem);
+    pila_apilar(p, NULL);
+    print_test("apila NULL?", pila_desapilar(p) == NULL);
 }
 
 void pruebas_pila_estudiante() {
     prueba_pila_vacia();
     prueba_crear_destruir();
+    prueba_apilar_desapilar();
     prueba_apilar_desapilar();
 }
 
