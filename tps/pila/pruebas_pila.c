@@ -2,49 +2,106 @@
 #include "testing.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define TEST_ELEM 1618033
+#define TEST_VOLUMEN 100000
 
-static void prueba_pila_vacia(void) {
+static void prueba_pila_vacia(void)
+{
     pila_t *p = pila_crear();
     print_test("la pila fue creada", p != NULL);
     print_test("la pila esta vacia", pila_esta_vacia(p));
     pila_destruir(p);
 }
 
-static void prueba_crear_destruir(void) {
+static void prueba_crear_destruir(void)
+{
     pila_t *p = pila_crear();
     print_test("la pila fue creada", p != NULL);
+    pila_destruir(p);
 }
 
-static void prueba_apilar_desapilar(void) {
+static void prueba_apilar_desapilar(void)
+{
     pila_t *p = pila_crear();
     int *elem = malloc(sizeof(int));
     *elem = TEST_ELEM;
     pila_apilar(p, elem);
-    int *test = malloc(sizeof())
-    print_test("apila int *?", (int *)pila_desapilar(p) == *elem);
+    int *test = (int *)pila_desapilar(p);
+    print_test("apila int *", *test == *elem);
+    free(test);
     pila_apilar(p, NULL);
-    print_test("apila NULL?", pila_desapilar(p) == NULL);
+    test = pila_desapilar(p);
+    print_test("apila NULL", test == NULL);
+    print_test("se mantiene invariante despues de apilar-desapilar", pila_esta_vacia(p));
+    pila_destruir(p);
 }
 
-void pruebas_pila_estudiante() {
+static void prueba_volumen(void)
+{
+    bool test = true;
+    pila_t *p = pila_crear();
+
+    for (size_t i = 0; i < TEST_VOLUMEN; i++)
+    {
+        size_t *elem = malloc(sizeof(size_t));
+        *elem = i;
+        pila_apilar(p, elem);
+        size_t *copia = pila_ver_tope(p);
+        if (*copia != *elem)
+            test = false;
+    }
+
+    print_test("apila volumen", test);
+
+    test = true;
+
+    for (size_t i = 0; i < TEST_VOLUMEN; i++)
+    {
+        size_t *copia = pila_ver_tope(p);
+        size_t *elem_post = pila_desapilar(p);
+        if (*copia != *elem_post)
+            test = 0;
+        free(copia);
+    }
+    print_test("desapila volumen", test);
+    print_test("esta vacia", pila_esta_vacia(p));
+    print_test("despues de apilar-desapilar, ver tope es invalido", pila_ver_tope(p) == NULL);
+    print_test("despues de apilar-desapilar, desapilar es invalido", pila_desapilar(p) == NULL);
+    pila_destruir(p);
+}
+
+static void prueba_recien_creada(void)
+{
+    pila_t *p = pila_crear();
+    print_test("recien creada, esta vacia", pila_esta_vacia(p));
+    int *test = pila_ver_tope(p);
+    print_test("recien creada, ver tope", test == NULL);
+    test = pila_desapilar(p);
+    print_test("recien creada, desapilar", test == NULL);
+    pila_destruir(p);
+}
+
+void pruebas_pila_estudiante()
+{
     prueba_pila_vacia();
     prueba_crear_destruir();
     prueba_apilar_desapilar();
-    prueba_apilar_desapilar();
+    prueba_volumen();
+    prueba_recien_creada();
 }
-
 
 /*
  * Función main() que llama a la función de pruebas.
  */
 
-#ifndef CORRECTOR  // Para que no dé conflicto con el main() del corrector.
+#ifndef CORRECTOR // Para que no dé conflicto con el main() del corrector.
 
-int main(void) {
+int main(void)
+{
     pruebas_pila_estudiante();
-    return failure_count() > 0;  // Indica si falló alguna prueba.
+    return failure_count() > 0; // Indica si falló alguna prueba.
 }
 
 #endif
