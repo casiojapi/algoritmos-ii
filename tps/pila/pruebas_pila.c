@@ -38,6 +38,24 @@ static void prueba_apilar_desapilar(void)
     pila_destruir(p);
 }
 
+static void prueba_destruir(void)
+{
+    pila_t *p = pila_crear();
+    int **vec = malloc(sizeof(int *) * 50);
+    for (int i = 0; i < 50; i++)
+    {
+        vec[i] = malloc(sizeof(int));
+        *(vec[i]) = i;
+        pila_apilar(p, vec[i]);
+    }
+    for (size_t i = 0; i < 50; i++)
+    {
+        free(vec[i]);
+    }
+    free(vec);
+    pila_destruir(p);
+}
+
 static void prueba_volumen(void)
 {
     bool test = true;
@@ -86,6 +104,7 @@ static void prueba_recien_creada(void)
 void pruebas_pila_estudiante()
 {
     prueba_pila_vacia();
+    prueba_destruir();
     prueba_crear_destruir();
     prueba_apilar_desapilar();
     prueba_volumen();
