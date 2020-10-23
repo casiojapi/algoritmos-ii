@@ -74,7 +74,7 @@ bool pila_apilar(pila_t *pila, void *valor)
 
 void *pila_ver_tope(const pila_t *pila)
 {
-    if (pila->cantidad == 0)
+    if (pila_esta_vacia(pila))
         return NULL;
 
     return pila->datos[pila->cantidad - 1];
@@ -82,7 +82,7 @@ void *pila_ver_tope(const pila_t *pila)
 
 void *pila_desapilar(pila_t *pila)
 {
-    if (pila->cantidad == 0)
+    if (pila_esta_vacia(pila))
         return NULL;
 
     if (pila->cantidad > 10 && pila->cantidad < pila->capacidad / 4)
