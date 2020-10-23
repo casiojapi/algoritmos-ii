@@ -90,5 +90,6 @@ void *pila_desapilar(pila_t *pila)
         if (!_redimension(pila, CTE_DESAPILAR))
             return NULL;
     }
-    return pila->datos[pila->cantidad-- - 1];
+    pila->cantidad--;
+    return pila->datos[pila->cantidad - 1];
 }

@@ -101,6 +101,11 @@ static void prueba_recien_creada(void)
     pila_destruir(p);
 }
 
+static void prueba_apilar_null(void)
+{
+    pila_t *p = pila_crear();
+}
+
 void pruebas_pila_estudiante()
 {
     prueba_pila_vacia();
