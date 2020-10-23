@@ -8,7 +8,7 @@
 
 #define TAM_BASE 10
 #define CTE_APILAR 2
-#define CTE_DESAPILAR 2
+#define CTE_DESAPILAR 0.5
 
 struct pila
 {
@@ -21,7 +21,17 @@ struct pila
  *                    PRIMITIVAS DE LA PILA
  * *****************************************************************/
 
-// ...
+//
+
+static bool _redimension(pila_t *p, float cte)
+{
+    void *aux = realloc(p->datos, sizeof(void *) * (size_t)((float)p->capacidad * cte));
+    if (aux == NULL)
+        return false;
+    p->datos = aux;
+    p->capacidad = (size_t)((float)p->capacidad * cte);
+    return true;
+}
 
 pila_t *pila_crear(void)
 {
@@ -54,11 +64,8 @@ bool pila_apilar(pila_t *pila, void *valor)
 {
     if (pila->cantidad >= pila->capacidad)
     {
-        void *aux = realloc(pila->datos, sizeof(void *) * pila->capacidad * CTE_APILAR);
-        if (aux == NULL)
-            return false;
-        pila->datos = aux;
-        pila->capacidad *= CTE_APILAR;
+        if (!_redimension(pila, CTE_APILAR))
+            return NULL;
     }
 
     pila->datos[pila->cantidad++] = valor;
@@ -78,15 +85,10 @@ void *pila_desapilar(pila_t *pila)
     if (pila->cantidad == 0)
         return NULL;
 
-    if (pila->cantidad < pila->capacidad / 4)
+    if (pila->cantidad > 10 && pila->cantidad < pila->capacidad / 4)
     {
-        //printf("achica. Capacidad pre: %zd\n", pila->capacidad);
-        void *aux = realloc(pila->datos, sizeof(void *) * pila->capacidad / CTE_DESAPILAR);
-        if (aux == NULL)
-            return false;
-        pila->datos = aux;
-        pila->capacidad /= CTE_DESAPILAR;
-        //printf("achico. Capacidad post: %zd\n", pila->capacidad);
+        if (!_redimension(pila, CTE_DESAPILAR))
+            return NULL;
     }
     return pila->datos[pila->cantidad-- - 1];
 }
