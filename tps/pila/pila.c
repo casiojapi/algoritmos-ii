@@ -6,7 +6,7 @@
 /* Definición del struct pila proporcionado por la cátedra.
  */
 
-#define SIZE_BASE 10
+#define TAM_BASE 10
 #define CTE_APILAR 2
 #define CTE_DESAPILAR 2
 
@@ -28,14 +28,14 @@ pila_t *pila_crear(void)
     pila_t *p = malloc(sizeof(pila_t));
     if (p == NULL)
         return NULL;
-    p->datos = malloc(sizeof(void *) * SIZE_BASE);
+    p->datos = malloc(sizeof(void *) * TAM_BASE);
     if (p->datos == NULL)
     {
         free(p);
         return NULL;
     }
     p->cantidad = 0;
-    p->capacidad = SIZE_BASE;
+    p->capacidad = TAM_BASE;
     return p;
 }
 
