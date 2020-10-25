@@ -91,5 +91,5 @@ void *pila_desapilar(pila_t *pila)
             return NULL;
     }
     pila->cantidad--;
-    return pila->datos[pila->cantidad - 1];
+    return pila->datos[pila->cantidad];
 }

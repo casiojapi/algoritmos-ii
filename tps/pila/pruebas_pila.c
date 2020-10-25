@@ -25,13 +25,13 @@ static void prueba_crear_destruir(void)
 static void prueba_apilar_desapilar(void)
 {
     pila_t *p = pila_crear();
-    int *elem = malloc(sizeof(int));
-    *elem = TEST_ELEM;
-    pila_apilar(p, elem);
-    int *test = (int *)pila_desapilar(p);
-    print_test("apila int *", *test == *elem);
-    free(test);
-    pila_apilar(p, NULL);
+    int elem = TEST_ELEM;
+    bool apila = pila_apilar(p, &elem);
+    print_test("apila correctamente", apila);
+    int *test = pila_desapilar(p);
+    print_test("apila int *", *test == elem);
+    apila = pila_apilar(p, NULL);
+    print_test("apila correctamente", apila);
     test = pila_desapilar(p);
     print_test("apila NULL", test == NULL);
     print_test("se mantiene invariante despues de apilar-desapilar", pila_esta_vacia(p));
@@ -65,7 +65,9 @@ static void prueba_volumen(void)
     {
         size_t *elem = malloc(sizeof(size_t));
         *elem = i;
-        pila_apilar(p, elem);
+        bool apila = pila_apilar(p, elem);
+        if (!apila)
+            fprintf(stderr, "no apila\n");
         size_t *copia = pila_ver_tope(p);
         if (*copia != *elem)
             test = false;
@@ -101,10 +103,7 @@ static void prueba_recien_creada(void)
     pila_destruir(p);
 }
 
-static void prueba_apilar_null(void)
-{
-    pila_t *p = pila_crear();
-}
+//static void prueba_apilar_null(void);
 
 void pruebas_pila_estudiante()
 {
