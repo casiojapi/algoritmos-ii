@@ -64,14 +64,14 @@ static void prueba_destruir(void)
 
 static void prueba_volumen(void)
 {
-    bool test = true;
+    bool apila = true;
     pila_t *p = pila_crear();
     size_t **vector_elem = malloc(sizeof(size_t *) * TEST_VOLUMEN);
     for (size_t i = 0; i < TEST_VOLUMEN; i++)
     {
         size_t test = TEST_ELEM * i;
         vector_elem[i] = &test;
-        bool apila = pila_apilar(p, vector_elem[i]);
+        apila = pila_apilar(p, vector_elem[i]);
         if (!apila)
             print_test("APILAR DA TRUE?", apila);
         size_t *copia = pila_ver_tope(p);
@@ -79,20 +79,20 @@ static void prueba_volumen(void)
             print_test("ver tope es igual a lo apilado", 0);
     }
 
-    print_test("apila volumen", test);
+    print_test("apila volumen", apila);
 
-    test = true;
+    apila = true;
 
     for (size_t i = 0; i < TEST_VOLUMEN; i++)
     {
         size_t *elem_post = pila_desapilar(p);
         if (vector_elem[TEST_VOLUMEN - i - 1] != elem_post)
         {
-            test = 0;
-            print_test("desapila volumen", test);
+            apila = 0;
+            print_test("desapila volumen", apila);
         }
     }
-    print_test("desapila volumen", test);
+    print_test("desapila volumen", apila);
     print_test("esta vacia", pila_esta_vacia(p));
     print_test("despues de apilar-desapilar, ver tope es invalido", pila_ver_tope(p) == NULL);
     print_test("despues de apilar-desapilar, desapilar es invalido", pila_desapilar(p) == NULL);
