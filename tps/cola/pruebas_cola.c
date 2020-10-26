@@ -7,23 +7,20 @@
 #define TEST_ELEM 1618033
 #define TEST_VOLUMEN 100000
 
-static void prueba_pila_vacia(void)
-{
+static void prueba_pila_vacia(void) {
     pila_t *p = pila_crear();
     print_test("la pila fue creada", p != NULL);
     print_test("la pila esta vacia", pila_esta_vacia(p));
     pila_destruir(p);
 }
 
-static void prueba_crear_destruir(void)
-{
+static void prueba_crear_destruir(void) {
     pila_t *p = pila_crear();
     print_test("la pila fue creada", p != NULL);
     pila_destruir(p);
 }
 
-static void prueba_apilar_desapilar(void)
-{
+static void prueba_apilar_desapilar(void) {
     pila_t *p = pila_crear();
     int *elem = malloc(sizeof(int));
     *elem = TEST_ELEM;
@@ -42,8 +39,7 @@ static void prueba_apilar_desapilar(void)
     pila_destruir(p);
 }
 
-static void prueba_volumen(void)
-{
+static void prueba_volumen(void) {
     bool apila = true;
     pila_t *p = pila_crear();
     size_t **vector_elem = malloc(sizeof(size_t *) * TEST_VOLUMEN);
@@ -80,8 +76,7 @@ static void prueba_volumen(void)
     pila_destruir(p);
 }
 
-static void prueba_recien_creada(void)
-{
+static void prueba_recien_creada(void) {
     pila_t *p = pila_crear();
     print_test("recien creada, esta vacia", pila_esta_vacia(p));
     int *test = pila_ver_tope(p);
@@ -91,8 +86,7 @@ static void prueba_recien_creada(void)
     pila_destruir(p);
 }
 
-static void prueba_apilar_null(void)
-{
+static void prueba_apilar_null(void) {
     pila_t *p = pila_crear();
     bool apila = pila_apilar(p, NULL);
     print_test("apilar da true", apila);

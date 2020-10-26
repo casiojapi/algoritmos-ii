@@ -53,11 +53,6 @@ void *cola_ver_primero(const cola_t *cola) {
     return cola->prim->dato;
 }
 
-// Saca el primer elemento de la cola. Si la cola tiene elementos, se quita el
-// primero de la cola, y se devuelve su valor, si está vacía, devuelve NULL.
-// Pre: la cola fue creada.
-// Post: se devolvió el valor del primer elemento anterior, la cola
-// contiene un elemento menos, si la cola no estaba vacía.
 void *cola_desencolar(cola_t *cola) {
     if (cola_esta_vacia(cola)) return NULL;
     nodo_t *pre = cola->prim;
