@@ -61,3 +61,20 @@ void *cola_desencolar(cola_t *cola) {
     nodo_destruir(pre);
     return dato;
 }   
+
+void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
+    nodo_t *actual = cola->prim;
+    if (actual == NULL){
+        free(cola);
+        return;
+    }
+    nodo_t *sig = actual->sig;
+    while (actual) {
+        if (destruir_dato != NULL)
+            destruir_dato(actual->dato);
+        nodo_destruir(actual);
+        actual = sig;
+        sig = actual->sig;
+    }
+    free(cola);
+}
