@@ -38,7 +38,7 @@ bool cola_esta_vacia(const cola_t *cola) {
 bool cola_encolar(cola_t *cola, void *valor) {
     nodo_t *n = nodo_crear(NULL);
     if (n == NULL) return false;
-    if (cola->prim == NULL) {
+    if (cola_esta_vacia(cola)) {
         cola->prim = n;
         cola->ult = n;
     } else {
@@ -63,12 +63,12 @@ void *cola_desencolar(cola_t *cola) {
 }   
 
 void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
-    nodo_t *actual = cola->prim;
-    if (actual == NULL){
+    if (cola_esta_vacia(cola)){
         free(cola);
         return;
     }
-    nodo_t *sig = actual->sig;
+    nodo_t *actual = cola->prim;
+    nodo_t *sig;
     while (actual) {
         if (destruir_dato != NULL)
             destruir_dato(actual->dato);
