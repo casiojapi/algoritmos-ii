@@ -40,7 +40,6 @@ static void prueba_apilar_desapilar(void)
     print_test("apila int - 2", test == &test_dos);
     print_test("se mantiene invariante despues de apilar-desapilar - 2", pila_esta_vacia(p));
     pila_destruir(p);
-    printf("destruyo?\n");
 }
 
 /*
