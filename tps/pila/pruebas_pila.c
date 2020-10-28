@@ -40,6 +40,7 @@ static void prueba_apilar_desapilar(void)
     print_test("apila int - 2", test == &test_dos);
     print_test("se mantiene invariante despues de apilar-desapilar - 2", pila_esta_vacia(p));
     pila_destruir(p);
+    printf("destruyo?\n");
 }
 
 /*
@@ -72,11 +73,14 @@ static void prueba_volumen(void)
         size_t test = TEST_ELEM * i;
         vector_elem[i] = &test;
         apila = pila_apilar(p, vector_elem[i]);
+
         if (!apila)
             print_test("APILAR DA TRUE?", apila);
+
         size_t *copia = pila_ver_tope(p);
+
         if (copia != vector_elem[i])
-            print_test("ver tope es igual a lo apilado", 0);
+            print_test("ver tope es igual a lo apilado", false);
     }
 
     print_test("apila volumen", apila);
@@ -86,13 +90,12 @@ static void prueba_volumen(void)
     for (size_t i = 0; i < TEST_VOLUMEN; i++)
     {
         size_t *elem_post = pila_desapilar(p);
+
         if (vector_elem[TEST_VOLUMEN - i - 1] != elem_post)
-        {
-            apila = 0;
-            print_test("desapila volumen", apila);
-        }
+            apila = false;
     }
-    print_test("desapila volumen", apila);
+    print_test("desapila el ciclo de volumen", apila);
+
     print_test("esta vacia", pila_esta_vacia(p));
     print_test("despues de apilar-desapilar, ver tope es invalido", pila_ver_tope(p) == NULL);
     print_test("despues de apilar-desapilar, desapilar es invalido", pila_desapilar(p) == NULL);

@@ -8,7 +8,10 @@
 
 #define TAM_BASE 10
 #define CTE_APILAR 2
-#define CTE_DESAPILAR 0.5
+#define CTE_DESAPILAR 2
+#define CTE_CUARTO 4
+#define TAM_MINIMO 10
+
 
 struct pila
 {
@@ -23,13 +26,13 @@ struct pila
 
 //
 
-static bool _redimension(pila_t *p, float cte)
+static bool _redimension(pila_t *p, size_t nueva_capacidad)
 {
-    void *aux = realloc(p->datos, sizeof(void *) * (size_t)((float)p->capacidad * cte));
+    void *aux = realloc(p->datos, sizeof(void *) * nueva_capacidad);
     if (aux == NULL)
         return false;
     p->datos = aux;
-    p->capacidad = (size_t)((float)p->capacidad * cte);
+    p->capacidad = nueva_capacidad;
     return true;
 }
 
@@ -64,7 +67,8 @@ bool pila_apilar(pila_t *pila, void *valor)
 {
     if (pila->cantidad >= pila->capacidad)
     {
-        if (!_redimension(pila, CTE_APILAR))
+        size_t nueva_cap = pila->capacidad * CTE_APILAR;
+        if (!_redimension(pila, nueva_cap))
             return NULL;
     }
 
@@ -85,9 +89,10 @@ void *pila_desapilar(pila_t *pila)
     if (pila_esta_vacia(pila))
         return NULL;
 
-    if (pila->cantidad > 10 && pila->cantidad < pila->capacidad / 4)
+    if (pila->cantidad > TAM_MINIMO && pila->cantidad < pila->capacidad / CTE_CUARTO)
     {
-        if (!_redimension(pila, CTE_DESAPILAR))
+        size_t nueva_cap = pila->capacidad / CTE_DESAPILAR;
+        if (!_redimension(pila, nueva_cap))
             return NULL;
     }
     pila->cantidad--;
