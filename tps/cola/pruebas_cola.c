@@ -7,95 +7,103 @@
 #define TEST_ELEM 1618033
 #define TEST_VOLUMEN 100000
 
-static void prueba_pila_vacia(void) {
-    pila_t *p = pila_crear();
-    print_test("la pila fue creada", p != NULL);
-    print_test("la pila esta vacia", pila_esta_vacia(p));
-    pila_destruir(p);
+// ok
+static void prueba_cola_vacia(void)
+{
+    cola_t *c = cola_crear();
+    print_test("la cola fue creada", c != NULL);
+    print_test("la cola esta vacia", cola_esta_vacia(c));
+    cola_destruir(c, NULL);
 }
 
-static void prueba_crear_destruir(void) {
-    pila_t *p = pila_crear();
-    print_test("la pila fue creada", p != NULL);
-    pila_destruir(p);
+//
+static void prueba_crear_destruir(void)
+{
+    cola_t *c = cola_crear();
+    print_test("la cola fue creada", c != NULL);
+    cola_destruir(c, NULL);
 }
 
-static void prueba_apilar_desapilar(void) {
-    pila_t *p = pila_crear();
+//
+static void prueba_encolar_desencolar(void)
+{
+    cola_t *c = cola_crear();
     int *elem = malloc(sizeof(int));
     *elem = TEST_ELEM;
-    bool apila = pila_apilar(p, elem);
-    print_test("apilar da true", apila);
-    int *test = pila_desapilar(p);
-    print_test("apila int * - 1 ", test == elem);
-    print_test("se mantiene invariante despues de apilar-desapilar - 1", pila_esta_vacia(p));
+    bool encola = cola_encolar(c, elem);
+    print_test("encolar da true", encola);
+    int *test = cola_desencolar(c);
+    print_test("encola int * - 1 ", test == elem);
+    print_test("se mantiene invariante despues de encolar-desencolar - 1", cola_esta_vacia(c));
     free(elem);
     int test_dos = TEST_ELEM;
-    apila = pila_apilar(p, &test_dos);
-    print_test("apilar da true", apila);
-    test = pila_desapilar(p);
-    print_test("apila int - 2", test == &test_dos);
-    print_test("se mantiene invariante despues de apilar-desapilar - 2", pila_esta_vacia(p));
-    pila_destruir(p);
+    encola = cola_encolar(c, &test_dos);
+    print_test("encolar da true", encola);
+    test = cola_desencolar(c);
+    print_test("encola int - 2", test == &test_dos);
+    print_test("se mantiene invariante despues de encolar-desencolar - 2", cola_esta_vacia(c));
+    cola_destruir(c, NULL);
 }
 
-static void prueba_volumen(void) {
-    bool apila = true;
-    pila_t *p = pila_crear();
+//
+static void prueba_volumen(void)
+{
+    bool encola = true;
+    cola_t *c = cola_crear();
     size_t **vector_elem = malloc(sizeof(size_t *) * TEST_VOLUMEN);
     for (size_t i = 0; i < TEST_VOLUMEN; i++)
     {
         size_t test = TEST_ELEM * i;
         vector_elem[i] = &test;
-        apila = pila_apilar(p, vector_elem[i]);
-        if (!apila)
-            print_test("APILAR DA TRUE?", apila);
-        size_t *copia = pila_ver_tope(p);
-        if (copia != vector_elem[i])
-            print_test("ver tope es igual a lo apilado", 0);
+        encola = cola_encolar(c, vector_elem[i]);
     }
 
-    print_test("apila volumen", apila);
-
-    apila = true;
-
+    print_test("encola volumen", encola);
+    encola = true;
+    
     for (size_t i = 0; i < TEST_VOLUMEN; i++)
     {
-        size_t *elem_post = pila_desapilar(p);
-        if (vector_elem[TEST_VOLUMEN - i - 1] != elem_post)
-        {
-            apila = 0;
-            print_test("desapila volumen", apila);
-        }
+        size_t *elem_post = cola_desencolar(c);
+
+        if (vector_elem[TEST_VOLUMEN - 1 - i] != elem_post)
+            encola = false;
     }
-    print_test("desapila volumen", apila);
-    print_test("esta vacia", pila_esta_vacia(p));
-    print_test("despues de apilar-desapilar, ver tope es invalido", pila_ver_tope(p) == NULL);
-    print_test("despues de apilar-desapilar, desapilar es invalido", pila_desapilar(p) == NULL);
+    
+    print_test("desencola el ciclo de volumen", encola);
+
+    print_test("esta vacia", cola_esta_vacia(c));
+    print_test("despues de encolar-desencolar, ver tope es invalido", cola_ver_primero(c) == NULL);
+    print_test("despues de encolar-desencolar, desencolar es invalido", cola_desencolar(c) == NULL);
     free(vector_elem);
-    pila_destruir(p);
+    cola_destruir(c, NULL);
 }
 
-static void prueba_recien_creada(void) {
-    pila_t *p = pila_crear();
-    print_test("recien creada, esta vacia", pila_esta_vacia(p));
-    int *test = pila_ver_tope(p);
+//
+static void prueba_recien_creada(void)
+{
+    cola_t *c = cola_crear();
+    print_test("recien creada, esta vacia", cola_esta_vacia(c));
+    int *test = cola_ver_primero(c);
     print_test("recien creada, ver tope", test == NULL);
-    test = pila_desapilar(p);
-    print_test("recien creada, desapilar", test == NULL);
-    pila_destruir(p);
+    test = cola_desencolar(c);
+    print_test("recien creada, desencolar", test == NULL);
+    cola_destruir(c, NULL);
 }
 
-static void prueba_apilar_null(void) {
-    pila_t *p = pila_crear();
-    bool apila = pila_apilar(p, NULL);
-    print_test("apilar da true", apila);
-    int *test = pila_desapilar(p);
-    print_test("apila NULL", test == NULL);
-    pila_destruir(p);
+//ok
+static void prueba_encolar_null(void)
+{
+    cola_t *c = cola_crear();
+    bool encola = cola_encolar(c, NULL);
+    print_test("encolar da true", encola);
+    int *test = cola_desencolar(c);
+    print_test("encola NULL", test == NULL);
+    cola_destruir(c, NULL);
 }
 
-void pruebas_pila_estudiante() {
+//
+void pruebas_cola_estudiante()
+{
     prueba_cola_vacia();
     prueba_crear_destruir();
     prueba_encolar_desencolar();
@@ -104,10 +112,12 @@ void pruebas_pila_estudiante() {
     prueba_encolar_null();
 }
 
+
 #ifndef CORRECTOR
 
-int main(void) {
-    pruebas_pila_estudiante();
+int main(void)
+{
+    pruebas_cola_estudiante();
     return failure_count() > 0;
 }
 

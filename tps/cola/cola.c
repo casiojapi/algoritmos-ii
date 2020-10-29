@@ -11,6 +11,7 @@ static nodo_t *nodo_crear(void *dato){
     nodo_t *n = malloc(sizeof(nodo_t));
     if (n == NULL) return NULL;
     n->dato = dato;
+    n->sig = NULL;
     return n;
 }
 
@@ -36,7 +37,7 @@ bool cola_esta_vacia(const cola_t *cola) {
 }
 
 bool cola_encolar(cola_t *cola, void *valor) {
-    nodo_t *n = nodo_crear(NULL);
+    nodo_t *n = nodo_crear(valor);
     if (n == NULL) return false;
     if (cola_esta_vacia(cola)) {
         cola->prim = n;
