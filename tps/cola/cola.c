@@ -1,5 +1,4 @@
 #include "cola.h"
-
 #include <stdlib.h>
 
 typedef struct nodo {
@@ -69,13 +68,13 @@ void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
         return;
     }
     nodo_t *actual = cola->prim;
-    nodo_t *sig;
+    nodo_t *ant;
     while (actual) {
         if (destruir_dato != NULL)
             destruir_dato(actual->dato);
-        nodo_destruir(actual);
-        actual = sig;
-        sig = actual->sig;
+        ant = actual;
+        actual = actual->sig;
+        nodo_destruir(ant);
     }
     free(cola);
 }
