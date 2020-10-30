@@ -43,15 +43,15 @@ void **multiprimeros(const cola_t *cola, const size_t k) {  //O(k)
     return primeros;
 }
 //ej 5 - como FUNCION
-void **multiprimeros_pub(const cola_t *cola, const size_t k) {
-    void **primeros = calloc(k, sizeof(void *));
+void **multiprimeros_pub(const cola_t *cola, const size_t k) {  //O(K + N)
+    void **primeros = calloc(k, sizeof(void *));    //O(K)
     if (primeros == NULL) return NULL;
     cola_t *copia = cola_crear();
     if (copia == NULL) {
         free(primeros);
         return NULL;
     }
-    for (int i = 0; !cola_esta_vacia(cola); i++) {
+    for (int i = 0; !cola_esta_vacia(cola); i++) {  //O(n)
         void *dato = cola_desencolar(cola);
         if (i < k) 
             primeros[i] = dato;
@@ -62,7 +62,7 @@ void **multiprimeros_pub(const cola_t *cola, const size_t k) {
         }
     }
 
-    while (!cola_esta_vacia(copia)) {
+    while (!cola_esta_vacia(copia)) {   //O(n)
         if (!cola_encolar(cola, cola_desencolar(copia))){
             cola_destruir(copia);
             free(primeros);
@@ -72,4 +72,23 @@ void **multiprimeros_pub(const cola_t *cola, const size_t k) {
 
     cola_destruir(copia);
     return primeros;
+}
+
+//PILA ES PIRAMIDAL?
+//usamos pila auxiliar
+bool pila_es_piramidal(pila_t* pila) {      //O(n)
+    pila_t* aux = pila_crear();
+    if (aux == NULL) return NULL;
+    bool es_piramidal = true;
+    while (!pila_esta_vacia(pila) && es_piramidal) {        //O(n)
+        int* tope = (int*) pila_desapilar(pila);
+        int* inferior = (int*) pila_ver_tope(pila);
+        es_piramidal = inferior ? *tope < *inferior : true;
+        pila_apilar(aux, (void*) tope);
+    }
+    while (!pila_esta_vacia(aux)) {     // O(n)
+        pila_apilar(pila, pila_desapilar(aux));
+    }
+    pila_destruir(aux);
+    return es_piramidal;
 }
