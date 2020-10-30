@@ -76,7 +76,7 @@ void **multiprimeros_pub(const cola_t *cola, const size_t k) {  //O(K + N)
 
 //PILA ES PIRAMIDAL?
 //usamos pila auxiliar
-bool pila_es_piramidal(pila_t* pila) {      //O(n)
+bool pila_es_piramidal(pila_t* pila) {      //O(n) n siendo n elementos en la pila.  
     pila_t* aux = pila_crear();
     if (aux == NULL) return NULL;
     bool es_piramidal = true;
@@ -92,3 +92,17 @@ bool pila_es_piramidal(pila_t* pila) {      //O(n)
     pila_destruir(aux);
     return es_piramidal;
 }
+
+bool pila_es_piramidal_recur(pila_t* pila) {
+    if (pila_esta_vacia(pila)){
+        return true;
+    }
+
+    int* tope = pila_desapilar(pila);
+    int* inferior = pila_ver_top(pila);
+
+    bool es_piramidal = inferior ? *tope < *inferior && pila_es_piramidal(pila) : true;
+
+    pila_apilar(pila, (void*) tope);
+    return es_piramidal;
+}   
