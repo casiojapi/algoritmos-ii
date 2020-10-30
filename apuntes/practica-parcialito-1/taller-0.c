@@ -119,3 +119,14 @@ size_t _raiz_entera(size_t n, size_t inicio, size_t fin) {  //T(n) = T(n/2) + O(
         return _raiz_entera(n, medio, fin);     //O(n/2)
 }
 
+void lista_iterar(lista_t* lista, bool (*visitar)(void* dato, void* extra), void* extra);
+
+//funcion sumar_pares, que mandes como parametro a lista iterar y devuelve la sumas
+bool _sumar_pares(int* n, int* suma){
+    if (*n % 2 == 0)
+        *suma += *n;
+    return true;
+}
+bool sumar_pares(void* dato, void* extra){
+    return _sumar_pares((int*) dato, (int*) extra);
+}
