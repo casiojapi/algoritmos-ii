@@ -105,4 +105,17 @@ bool pila_es_piramidal_recur(pila_t* pila) {
 
     pila_apilar(pila, (void*) tope);
     return es_piramidal;
-}   
+}
+
+//div y conquer parte entera de raiz de n, en O(log n)
+size_t _raiz_entera(size_t n, size_t inicio, size_t fin) {  //T(n) = T(n/2) + O(1)
+    size_t medio = (inicio + fin) / 2;
+    size_t cuadrado = medio * medio;
+    if (cuadrado <= n && (medio + 1) * (medio + 1) > n)     //O(1)
+        return medio;
+    if (cuadrado > n)  
+        return _raiz_entera(n, inicio, medio);  //O(n/2)
+    if (cuadrado < n)
+        return _raiz_entera(n, medio, fin);     //O(n/2)
+}
+
