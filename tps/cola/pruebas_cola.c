@@ -119,8 +119,7 @@ void pruebas_cola_estudiante() {
     prueba_volumen();
     prueba_recien_creada();
     prueba_encolar_null();
-    prueba_destruccion();
-    prueba_destruccion_cola_adentro_cola();
+    prueba_destruccion_free();
 }
 
 #ifndef CORRECTOR

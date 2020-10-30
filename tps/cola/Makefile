@@ -6,3 +6,5 @@ clean:
 	rm *.o pruebas
 comp:
 	gcc -g -o pruebas *.c
+zip:
+	zip cola *.c *.h
