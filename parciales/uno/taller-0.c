@@ -94,9 +94,8 @@ bool pila_es_piramidal(pila_t* pila) {      //O(n) n siendo n elementos en la pi
 }
 
 bool pila_es_piramidal_recur(pila_t* pila) {
-    if (pila_esta_vacia(pila)){
+    if (pila_esta_vacia(pila))
         return true;
-    }
 
     int* tope = pila_desapilar(pila);
     int* inferior = pila_ver_top(pila);
