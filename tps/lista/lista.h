@@ -2,6 +2,7 @@
 #define LISTA_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 
 /* *****************************************************************
@@ -73,7 +74,7 @@ void lista_destruir(lista_t *lista, void (*destruir_dato)(void *));
  *                    PRIMITIVAS ITERADOR INTERNO
  * *****************************************************************/
 
-void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra), void *extra);
+ 
 
 /* *****************************************************************
  *                    PRIMITIVAS ITERADOR EXTERNO
