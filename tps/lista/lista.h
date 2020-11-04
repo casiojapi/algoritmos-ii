@@ -74,7 +74,11 @@ void lista_destruir(lista_t *lista, void (*destruir_dato)(void *));
  *                    PRIMITIVAS ITERADOR INTERNO
  * *****************************************************************/
 
- 
+// Recibe una lista, itera sobre ella y aplica una funcion "visitar" a cada uno de los datos en la lista.
+// Deja de iterar en el instante en el cual la funcion visitar devuelva false.
+// Pre: la lista fue creada, recibe una funcion visitar valida.
+// Post: se aplico la funcion por sobre cada elemento hasta que "visitar" devolvio false. 
+ void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra), void *extra);
 
 /* *****************************************************************
  *                    PRIMITIVAS ITERADOR EXTERNO
@@ -82,12 +86,51 @@ void lista_destruir(lista_t *lista, void (*destruir_dato)(void *));
 
 typedef struct lista_iter lista_iter_t;
 
+
+// Recibe una lista, y crea un iterador externo para ella. 
+// En el caso de una falla de memoria, devuelve NULL.
+// Pre: la lista fue previamente creada.
+// Post: devuelve un iterador externo apuntando al primer elemento de la lista.
 lista_iter_t *lista_iter_crear(lista_t *lista);
+
+// Recibe un iterador externo y avanza un elemento, devuelve true si logra avanzar.
+// Devuelve false en caso de que el iterador se encuentre originalmente en el final de la lista. 
+// Pre: el iterador fue creado previamente. 
+// Post: el iterador avanza una posicion de la lista.
 bool lista_iter_avanzar(lista_iter_t *iter);
+
+// Recibe un iterador externo y devuelve el dato que contiene el nodo actual.
+// Devuelve NULL en caso de estar al final de la lista.
+// Pre: el iterador fue creado previamente. 
+// Post: devuelve correctamente el dato apuntado por el nodo actual. 
 void *lista_iter_ver_actual(const lista_iter_t *iter);
+
+// Recibe un iterador y devuelve true si se encuentra en el final de la lista.
+// Devuelve false en el caso contrario. 
+// Una iterador se encuentra en el final de una lista si su nodo actual apunta a NULL.
+// Pre: el iterador fue previamente creado. 
+// Post: devuelve correctamente si esta o no en el final.
 bool lista_iter_al_final(const lista_iter_t *iter);
+
+// Recibe un iterador y libera su memoria. 
+// Pre: el iterador fue previamente creado. 
+// Post: se destruyo correctamente el iterador. 
 void lista_iter_destruir(lista_iter_t *iter);
+
+// Recibe un iterador y un dato, y inserta un nodo conteniendo a ese dato entre la posicion anterior y actual del iterador. 
+// Devuelve false en caso de error de memoria. Devulve true si salio todo bien.
+// Pre: el iterador fue creado previamente. 
+// Post: se inserto correctamente un nodo conteniendo el dato dado por parametro.
+// Post2: Ahora el nodo anterior esta apuntando al nuevo nodo, y este apunta al actual.
+// Post3: la lista manitene su invariante. 
 bool lista_iter_insertar(lista_iter_t *iter, void *dato);
+
+// Recibe un iterador y elimina el nodo actual en el que se encuetra. 
+// Devuelve NULL en caso de encontrarse al final de la lista.
+// Pre: el iterador fue creado previamente. 
+// Post: se elimino correctamente el nodo actual.
+// Post2: Ahora el nodo anterior esta apuntando al siguiente del actual.
+// Post3: la lista manitene su invariante. 
 void *lista_iter_borrar(lista_iter_t *iter);
 
 /* *****************************************************************

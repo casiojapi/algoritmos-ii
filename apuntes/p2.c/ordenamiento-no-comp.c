@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-int* counting_sort(int* arr, int n, int min, int max) {
+int* counting_sort(int* arr, int n, int min, int max) {     //O(n + k) - estable
     int k = max - min;
     int contador[k + 1];
     for (int i = 0; i < k + 1; i++) contador[1] = 0;
@@ -23,4 +23,4 @@ int* counting_sort(int* arr, int n, int min, int max) {
         res[pos] = valor;
     }
     return res;
-}
+} 
