@@ -69,7 +69,7 @@ bool pila_apilar(pila_t *pila, void *valor)
     {
         size_t nueva_cap = pila->capacidad * CTE_APILAR;
         if (!_redimension(pila, nueva_cap))
-            return NULL;
+            return false;
     }
 
     pila->datos[pila->cantidad++] = valor;
@@ -92,8 +92,8 @@ void *pila_desapilar(pila_t *pila)
     if (pila->cantidad > TAM_MINIMO && pila->cantidad < pila->capacidad / CTE_CUARTO)
     {
         size_t nueva_cap = pila->capacidad / CTE_DESAPILAR;
-        if (!_redimension(pila, nueva_cap))
-            return NULL;
+        _redimension(pila, nueva_cap);
+            
     }
     pila->cantidad--;
     return pila->datos[pila->cantidad];
