@@ -32,19 +32,18 @@ cola_t *cola_crear(void) {
 }
 
 bool cola_esta_vacia(const cola_t *cola) {
-    return !cola->prim;
+    return !cola->prim && !cola->ult;
 }
 
 bool cola_encolar(cola_t *cola, void *valor) {
     nodo_t *n = nodo_crear(valor);
-    if (n == NULL) return false;
-    if (cola_esta_vacia(cola)) {
+    if (!n) return false;
+    if (cola_esta_vacia(cola))
         cola->prim = n;
-        cola->ult = n;
-    } else {
+    else
         cola->ult->sig = n;
-        cola->ult = n;
-    }
+
+    cola->ult = n;
     return true;
 }
 
@@ -57,24 +56,20 @@ void *cola_desencolar(cola_t *cola) {
     if (cola_esta_vacia(cola)) return NULL;
     nodo_t *pre = cola->prim;
     cola->prim = pre->sig;
+    if (!cola->prim)
+        cola->ult = NULL;
     void *dato = pre->dato;
     nodo_destruir(pre);
     return dato;
 }   
 
 void cola_destruir(cola_t *cola, void (*destruir_dato)(void *)) {
-    if (cola_esta_vacia(cola)){
-        free(cola);
-        return;
-    }
     nodo_t *actual = cola->prim;
-    nodo_t *ant;
     while (actual) {
-        if (destruir_dato != NULL)
-            destruir_dato(actual->dato);
-        ant = actual;
         actual = actual->sig;
-        nodo_destruir(ant);
+        void* dato = cola_desencolar(cola);
+        if (destruir_dato != NULL)
+            destruir_dato(dato);
     }
     free(cola);
 }
