@@ -42,26 +42,6 @@ static void prueba_apilar_desapilar(void)
     pila_destruir(p);
 }
 
-/*
-static void prueba_destruir(void)
-{
-    pila_t *p = pila_crear();
-    int **vec = malloc(sizeof(int *) * 50);
-    for (int i = 0; i < 50; i++)
-    {
-        vec[i] = malloc(sizeof(int));
-        *(vec[i]) = i;
-        pila_apilar(p, vec[i]);
-    }
-    for (size_t i = 0; i < 50; i++)
-    {
-        free(vec[i]);
-    }
-    free(vec);
-    pila_destruir(p);
-}
-*/
-
 static void prueba_volumen(void)
 {
     bool apila = true;
@@ -73,13 +53,10 @@ static void prueba_volumen(void)
         vector_elem[i] = &test;
         apila = pila_apilar(p, vector_elem[i]);
 
-        //if (!apila)
-        //    print_test("APILAR DA TRUE?", apila);
-
         size_t *copia = pila_ver_tope(p);
 
         if (copia != vector_elem[i])
-            print_test("ver tope es igual a lo apilado", false);
+            apila = false;
     }
 
     print_test("apila el ciclo de volumen", apila);

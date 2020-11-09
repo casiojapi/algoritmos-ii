@@ -4,3 +4,5 @@ mem:
 	valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./pruebas
 clean:
 	rm *.o pruebas
+zip:
+	zip pila *.c *.h

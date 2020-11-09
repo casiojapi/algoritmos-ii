@@ -93,7 +93,6 @@ void *pila_desapilar(pila_t *pila)
     {
         size_t nueva_cap = pila->capacidad / CTE_DESAPILAR;
         _redimension(pila, nueva_cap);
-            
     }
     pila->cantidad--;
     return pila->datos[pila->cantidad];
