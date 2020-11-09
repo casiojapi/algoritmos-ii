@@ -57,13 +57,10 @@ bool lista_insertar_ultimo(lista_t *lista, void *dato) {
     nodo_t* n = nodo_crear(dato, NULL);
     if (!n) return false;
 
-    if (lista_esta_vacia(lista)){
+    if (lista_esta_vacia(lista))
         lista->prim = n;
-        lista->ult = n;
-        lista->largo++;
-        return true;
-    }
-    lista->ult->prox = n;
+    else
+        lista->ult->prox = n;
     lista->ult = n;
     lista->largo++;
     return true;
@@ -103,7 +100,7 @@ void lista_destruir(lista_t *lista, void (*destruir_dato)(void *)){
         return;
     }
     nodo_t* actual = lista->prim;
-    nodo_t* sig = actual;
+    nodo_t* sig;
     while (actual) {
         sig = actual->prox;
         if (destruir_dato)
@@ -151,7 +148,6 @@ bool lista_iter_avanzar(lista_iter_t *iter) {
     return true;
 }
 
-
 void *lista_iter_ver_actual(const lista_iter_t *iter) {
     if (lista_iter_al_final(iter)) return NULL;
     return iter->act->dato;
@@ -168,31 +164,34 @@ void lista_iter_destruir(lista_iter_t *iter) {
 
 
 bool lista_iter_insertar(lista_iter_t *iter, void *dato) {
-    nodo_t* nuevo = nodo_crear(dato, iter->act);
-    if (!nuevo) return false;
-
-    iter->lista->largo++;
-
-    if (!iter->ant)
-        iter->lista->prim = nuevo;
-
-    else 
+    if (lista_iter_al_final(iter)) {
+        if (!lista_insertar_ultimo(iter->lista, dato))
+            return false;
+        iter->act = iter->lista->ult;
+    }
+    else if (!iter->ant){
+        if (!lista_insertar_primero(iter->lista, dato))
+            return false;
+        iter->act = iter->lista->prim;
+        iter->ant = NULL;
+    } 
+    else {
+        nodo_t* nuevo = nodo_crear(dato, iter->act);
+        if (!nuevo) return false;
         iter->ant->prox = nuevo;
-
-    iter->act = nuevo;
-
-    if (lista_iter_al_final(iter))
-        iter->lista->ult = nuevo;
-
+        iter->act = nuevo;
+        iter->lista->largo++;
+    }
     return true;
 }
+
 
 
 void *lista_iter_borrar(lista_iter_t *iter) {
     if (lista_iter_al_final(iter)) return NULL;
     void* dato = lista_iter_ver_actual(iter);
     iter->lista->largo--;
-    
+
     if (!iter->ant)
         iter->lista->prim = iter->act->prox;
     else
