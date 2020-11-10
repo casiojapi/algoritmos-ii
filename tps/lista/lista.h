@@ -20,7 +20,7 @@ typedef struct lista lista_t;
  *                    PRIMITIVAS DE LA LISTA
  * *****************************************************************/
 
-// Crea una lista.
+// Crea una lista. En caso de error de memoria, devuelve NULL.
 // Post: devuelve una nueva lista vacía.
 lista_t *lista_crear(void);
 
@@ -75,9 +75,9 @@ void lista_destruir(lista_t *lista, void (*destruir_dato)(void *));
  * *****************************************************************/
 
 // Recibe una lista, itera sobre ella y aplica una funcion "visitar" a cada uno de los datos en la lista.
-// Deja de iterar en el instante en el cual la funcion visitar devuelva false.
+// Deja de iterar en el instante en el cual la funcion visitar devuelva false o se llegue al final de la lista.
 // Pre: la lista fue creada, recibe una funcion visitar valida.
-// Post: se aplico la funcion por sobre cada elemento hasta que "visitar" devolvio false. 
+// Post: se aplico la funcion por sobre cada elemento hasta que "visitar" devolvio false, o se llego al final de la lista.
  void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra), void *extra);
 
 /* *****************************************************************

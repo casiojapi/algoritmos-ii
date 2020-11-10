@@ -36,18 +36,15 @@ lista_t *lista_crear(void){
 }
 
 bool lista_esta_vacia(const lista_t *lista){
-    return !lista->largo;
+    return !lista->largo && !lista->prim && !lista->ult;
 }
 
 bool lista_insertar_primero(lista_t *lista, void *dato){
     nodo_t* n = nodo_crear(dato, lista->prim);
     if (!n) return false;
-
-    lista->prim = n;
-
     if (lista_esta_vacia(lista))
         lista->ult = n;
-
+    lista->prim = n;
     lista->largo++;
     return true;
 
@@ -74,7 +71,7 @@ void *lista_borrar_primero(lista_t *lista) {
     lista->prim = viejo->prox;
     nodo_destruir(viejo);
     lista->largo--;
-    if (!lista_largo(lista)) // if largo es 0, o sea que originalmente tenia 1 elemento.
+    if (lista_largo(lista) == 0) // if largo es 0, o sea que originalmente tenia 1 elemento.
         lista->ult = NULL;
     return dato;
 
@@ -95,17 +92,14 @@ size_t lista_largo(const lista_t *lista) {
 }
 
 void lista_destruir(lista_t *lista, void (*destruir_dato)(void *)){
-    if (lista_esta_vacia(lista)) {
-        free(lista);
-        return;
-    }
+
     nodo_t* actual = lista->prim;
     nodo_t* sig;
     while (actual) {
         sig = actual->prox;
+        void* dato = lista_borrar_primero(lista);
         if (destruir_dato)
-            destruir_dato(actual->dato);
-        free(actual);
+            destruir_dato(dato);
         actual = sig;
     }
     free(lista);

@@ -42,14 +42,7 @@ void prueba_crear_destruir(void) {
     lista_t*l_4 = lista_crear();
     print_test("la lista 4 fue creada", l_4);
     print_test("la lista 4 esta vacia", lista_esta_vacia(l_4));
-    int* elem_4 = malloc(sizeof(int));
-    print_test("se creo el elemento de prueba", elem_4);
-    inserta = lista_insertar_ultimo(l_4, elem_4);
-    print_test("inserta ultimo (en lista vacia) - lista 4", inserta);
-    int* check_4 = lista_ver_primero(l_4);
-    print_test("inserta correctamente - lista 4", elem_4 == check_4);
-    lista_destruir(l_4, NULL);
-    free(elem_4);
+    lista_destruir(l_4, free);
 }
 
 void prueba_insertar_eliminar(void) {
@@ -73,7 +66,8 @@ void prueba_insertar_eliminar(void) {
     free(elem);
     free(elem_2);
 }
-void prueba_volumen() {
+
+void prueba_volumen_primero() {
     lista_t* l = lista_crear();
     size_t *arr = malloc(sizeof(size_t) * TEST_VOLUMEN);
     print_test("se crea el arreglo de prueba", arr);
@@ -87,6 +81,29 @@ void prueba_volumen() {
     print_test("inserta en volumen", inserta);
 
     for (size_t i = TEST_VOLUMEN - 1 ; i > 0; i--) {
+        test = lista_borrar_primero(l);
+        if (*test != i)
+            inserta = false;
+    }
+    print_test("borra en volumen", inserta);
+    lista_destruir(l, NULL);
+    free(arr);
+}
+
+void prueba_volumen_ultimo() {
+    lista_t* l = lista_crear();
+    size_t *arr = malloc(sizeof(size_t) * TEST_VOLUMEN);
+    print_test("se crea el arreglo de prueba", arr);
+    bool inserta = true;
+    size_t* test; 
+    for (size_t i = 0; i < TEST_VOLUMEN; i++) {
+        arr[i] = i;
+        if (!lista_insertar_ultimo(l, arr + i))
+            inserta = false;
+    }
+    print_test("inserta en volumen", inserta);
+
+    for (size_t i = 0; i < TEST_VOLUMEN; i++) {
         test = lista_borrar_primero(l);
         if (*test != i)
             inserta = false;
@@ -167,7 +184,7 @@ void prueba_interno_hasta_es_primo(void) {
     bool ok = true;
     size_t n;
     for (size_t i = 0; i < TEST_ITER; i++) {
-        arr[i] = i;
+        arr[i] = i * 5 + 111;
         if (!lista_insertar_primero(l, arr + i))
             ok = false;
     }
@@ -189,17 +206,42 @@ void prueba_iterador_agregar_principio(void) {
     lista_destruir(l, NULL);
 }
 
+void prueba_iterador_agregar_principio_no_vacia(void) {
+    lista_t* l = lista_crear();
+
+    size_t* arr = malloc(sizeof(size_t) * TEST_ITER);
+    bool ok = true;
+    for (size_t i = 0; i < TEST_ITER; i++) {
+        arr[i] = i * 5 + 111;
+        if (!lista_insertar_primero(l, arr + i))
+            ok = false;
+    }
+    print_test("inserta los elementos", ok);
+    lista_iter_t* iter = lista_iter_crear(l);
+    int elem = TEST_ELEM;
+    print_test("iterador inserta correctamente", lista_iter_insertar(iter, &elem));
+    print_test("ver actual es lista->prim", lista_ver_primero(l) == lista_iter_ver_actual(iter));
+    lista_iter_destruir(iter);
+    lista_destruir(l, NULL);
+    free(arr);
+}
+
 void prueba_iterador_agregar_final(){
     lista_t* l = lista_crear();
     lista_iter_t* iter = lista_iter_crear(l);
+    size_t *arr = malloc(sizeof(size_t) * TEST_ITER);
     bool ok = true;
-
+    bool avanza = true;
     for (size_t i = 0; i < TEST_ITER; i++){
-        if (!lista_insertar_primero(l, NULL))
+        arr[i] = i;
+        if (!lista_iter_insertar(iter, arr + i))
             ok = false;
-        lista_iter_avanzar(iter);
+        if (!lista_iter_avanzar(iter))
+            avanza = false;
     }
     print_test("inserta correctamente", ok);
+    print_test("avanza correctamente", avanza);
+
     print_test("iterador esta en el final", lista_iter_al_final(iter));
     size_t *al_final = malloc(sizeof(size_t));
     *al_final = TEST_ELEM;
@@ -210,6 +252,7 @@ void prueba_iterador_agregar_final(){
     print_test("iter al final es equivalente a insertar ultimo", test_iter == test_lista);
     lista_destruir(l, NULL);
     free(al_final);
+    free(arr);
     lista_iter_destruir(iter);
 }
 
@@ -219,16 +262,31 @@ void prueba_agregar_medio(){
     size_t *arr = malloc(sizeof(size_t) * TEST_ITER);
     bool ok = true;
     for (size_t i = 0; i < TEST_ITER; i++){
-        arr[i] = i;
         if (!lista_iter_insertar(iter, arr + i))
             ok = false;
     }
     print_test("inserta correctamente", ok);
-    for (size_t i = 0; i < TEST_ITER / 2; i++)
-        lista_iter_avanzar(iter);
-    size_t* ver = lista_iter_ver_actual(iter);
-    print_test("inserta en el medio", *ver == TEST_ITER/2);
+    ok = true;
+
+    for (size_t i = 0; i < TEST_ITER / 2; i++) {
+        if (!lista_iter_avanzar(iter))
+            ok = false;
+    }
+    print_test("avanza correctamente", ok);
+    int elem = TEST_ITER;
+    ok = lista_iter_insertar(iter, &elem);
+    print_test("inserta correctamente", ok);
+
+    lista_iter_t* iter_2 = lista_iter_crear(l);
+    for (size_t i = 0; i < TEST_ITER / 2; i++) {
+        if (!lista_iter_avanzar(iter_2))
+            ok = false;
+    }
+    void* test = lista_iter_ver_actual(iter_2);
+    print_test("avanza correctamente", ok);
+    print_test("inserta en el medio", &elem == test);
     lista_iter_destruir(iter);
+    lista_iter_destruir(iter_2);
     lista_destruir(l, NULL);
     free(arr);
 }
@@ -238,10 +296,12 @@ void prueba_cambia_prim(){
     lista_iter_t* iter = lista_iter_crear(l);
     size_t elem = TEST_ITER;
     int* antes = lista_ver_primero(l);
-    lista_iter_insertar(iter, &elem);
+    print_test("inserta", lista_iter_insertar(iter, &elem));
     int* desp = lista_ver_primero(l);
     print_test("cambia prim", antes != desp);
-    lista_iter_borrar(iter);
+    antes = lista_iter_ver_actual(iter);
+    void* borrado = lista_iter_borrar(iter);
+    print_test("borra el elemento deseado", borrado == antes);
     print_test("cambia prim - post", lista_ver_primero(l) != desp);
     lista_destruir(l, NULL);
     lista_iter_destruir(iter);
@@ -257,13 +317,14 @@ void prueba_cambia_ult(){
         arr[i] = i;
         if (!lista_iter_insertar(iter, arr + i))
             ok = false;
-        if (i < TEST_ITER -1)
-            avanza = lista_iter_avanzar(iter);
+        if (i < TEST_ITER -1 && !lista_iter_avanzar(iter))
+            avanza = false;
     }
     print_test("inserta correctamente", ok);
     print_test("avanza correctamente", avanza);
     size_t* antes = lista_ver_ultimo(l);
-    lista_iter_borrar(iter);
+    size_t* borrado = lista_iter_borrar(iter);
+    print_test("borra el elemento deseado", antes == borrado);
     size_t* despues = lista_ver_ultimo(l);
     print_test("cambia ult", antes != despues);
     lista_destruir(l, NULL);
@@ -284,16 +345,17 @@ void prueba_eliminar_elemento_medio(){
             ok = false;
         if (i < TEST_ITER / 2)
             avanza = lista_iter_avanzar(iter);
-    }
+    } 
     print_test("inserta correctamente", ok);
     print_test("avanza correctamente", avanza);
     size_t* antes = lista_iter_ver_actual(iter);
-    lista_iter_borrar(iter);
+    void* borrado = lista_iter_borrar(iter);
+    print_test("borra el elemento correcto", borrado == antes);
     size_t* despues = lista_iter_ver_actual(iter);
     print_test("elemento eliminado no esta mas", despues != antes);
     free(arr);
     lista_destruir(l, NULL);
-    lista_iter_destruir(iter);    
+    lista_iter_destruir(iter);
 }
 
 
@@ -301,11 +363,13 @@ void pruebas_lista_estudiante() {
     prueba_crear_destruir();
     prueba_insertar_eliminar();
     prueba_elemento_null();
-    prueba_volumen();
+    prueba_volumen_primero();
+    prueba_volumen_ultimo();
     prueba_iterador_interno_sin_corte();
     prueba_iterador_interno_con_corte();
     prueba_iterador_agregar_principio();
     prueba_iterador_agregar_final();
+    prueba_iterador_agregar_principio_no_vacia();
     prueba_agregar_medio();
     prueba_cambia_prim();
     prueba_cambia_ult();
