@@ -36,7 +36,22 @@ char **split(const char *str, char sep) {
 }
 
 char *join(char **strv, char sep) {
-    
+    size_t strs = 0, mem = 0;
+
+    size_t lens[MAX_IND];
+    for (size_t i = 0; strv[i]; i++) {
+        lens[strs] = strlen(strv[i]) + 1;
+        mem += lens[strs++];
+    }
+    char* c = malloc(sizeof(char) * mem);
+    if (!c) return NULL;
+    size_t index = 0;
+    for (size_t i = 0; i < strs; i++) {
+        strncpy(c + index, strv[i], lens[i] -1);
+        index += lens[i];
+        strncpy(c + index - 2, &sep, lens[i] -1);
+    }
+    return c;
 }
 
 void free_strv(char *strv[]) {
@@ -54,12 +69,14 @@ int main(void) {
     free(c);
     printf("%s\n", c = substr("", 2));
     free(c);
-    
-    char** spli = split(",", ',');
+    */
+    char** spli = split("abc,def,cos", ',');
     for (size_t i = 0; spli[i]; i++) {
         printf("\"%s\"\n", spli[i]);
     }
+    char* stro = join(spli, '+');
+    printf("%s\n", stro);
+    free(stro);
     free_strv(spli);
-    */
     return 0;
 }
