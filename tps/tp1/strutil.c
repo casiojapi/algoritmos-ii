@@ -14,6 +14,7 @@ char *substr(const char *str, size_t n) {
 }
 
 char **split(const char *str, char sep) {
+    if (!str) return NULL;
     size_t n = strlen(str);
     size_t cadenas = 0;
     char** cc = NULL;
@@ -37,6 +38,8 @@ char **split(const char *str, char sep) {
 
 char *join(char **strv, char sep) {
     size_t strs = 0, mem = 0;
+    if (!strv) return NULL;
+    if (!strv[0]) return "";
 
     size_t lens[MAX_IND];
     for (size_t i = 0; strv[i]; i++) {
@@ -47,10 +50,11 @@ char *join(char **strv, char sep) {
     if (!c) return NULL;
     size_t index = 0;
     for (size_t i = 0; i < strs; i++) {
-        strncpy(c + index, strv[i], lens[i] -1);
-        index += lens[i];
-        strncpy(c + index, &sep, 1);
+        strncpy(c + index, strv[i], lens[i]);
+        index += lens[i] -1;
+        strncpy(c + index++, &sep, 1);
     }
+    c[index-1] = '\0';
     return c;
 }
 
@@ -58,16 +62,4 @@ void free_strv(char *strv[]) {
     for (size_t i = 0; strv[i]; i++)
         free(strv[i]);
     free(strv);
-}
-
-int main(void) {
-    char** spli = split("abc,def,cos", ',');
-    for (size_t i = 0; spli[i]; i++) {
-        printf("\"%s\"\n", spli[i]);
-    }
-    char* stro = join(spli, '+');
-    printf("%s\n", stro);
-    free(stro);
-    free_strv(spli);
-    return 0;
 }
