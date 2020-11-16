@@ -39,14 +39,20 @@ char **split(const char *str, char sep) {
 char *join(char **strv, char sep) {
     size_t strs = 0, mem = 0;
     if (!strv) return NULL;
-    if (!strv[0]) return "";
 
     size_t lens[MAX_IND];
     for (size_t i = 0; strv[i]; i++) {
         lens[strs] = strlen(strv[i]) + 1;
         mem += lens[strs++];
     }
+    if (!mem) {
+        char* c = calloc(1, sizeof(char));
+        if (!c) return NULL;
+        c[0] = "\0";
+        return c;
+    }
     char* c = calloc(mem, sizeof(char));
+
     if (!c) return NULL;
     size_t index = 0;
     for (size_t i = 0; i < strs; i++) {
