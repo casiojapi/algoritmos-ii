@@ -44,15 +44,16 @@ bool calculadora(char* linea) {
     }
     for (size_t i = 0; strv[i]; i++) {
         if (!calc_parse(strv[i], t)) {
-            free(strv);
-            return false;
+            break;
         }
         else if (t->type == TOK_NUM) {
             apilar_num(pila, t->value);
             nums++;
         }
         else if (t->type == TOK_OPER) {
-            if (!operar(pila, t->oper, nums)) return false;
+            if (!operar(pila, t->oper, nums)) {
+                break;
+            }
             nums = 1;
         }
         else if (t->type == TOK_LPAREN || t->type == TOK_RPAREN) {
@@ -64,11 +65,13 @@ bool calculadora(char* linea) {
         free_strv(strv);
         free(t);
         pilanum_destruir(pila);
+        free(res);
         return false;
     }
     fprintf(stdout, "%ld\n", *res);
     free_strv(strv);
     free(t);
+    free(res);
     pilanum_destruir(pila);
     return true;
 }
@@ -123,78 +126,66 @@ bool operar(pilanum_t* p, struct calc_oper oper, size_t nums) {
 }
 
 bool oper_suma(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num)); calc_num* b = malloc(sizeof(calc_num));
-    if (!a || !b) return false;
-    if (!desapilar_num(p, b)) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, *a + *b);
+    calc_num a, b;
+    if (!desapilar_num(p, &b)) return false;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, a + b);
     return true;
 }
 
 bool oper_resta(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num)); calc_num* b = malloc(sizeof(calc_num));
-    if (!a || !b) return false;
-    if (!desapilar_num(p, b)) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, *a - *b);
+    calc_num a, b;
+    if (!desapilar_num(p, &b)) return false;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, a - b);
     return true;
 }
 
 bool oper_multi(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num)); calc_num* b = malloc(sizeof(calc_num));
-    if (!a || !b) return false;
-    if (!desapilar_num(p, b)) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, (*a) * (*b));
+    calc_num a, b;
+    if (!desapilar_num(p, &b)) return false;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, a * b);
     return true;
 }
 
 bool oper_div(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num)); calc_num* b = malloc(sizeof(calc_num));
-    if (!a || !b) return false;
-    if (!desapilar_num(p, b)) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, (*a) / (*b));
+    calc_num a, b;
+    if (!desapilar_num(p, &b)) return false;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, a / b);
     return true;
 }
 
 bool oper_pot(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num)); calc_num* b = malloc(sizeof(calc_num));
-    if (!a || !b) return false;
-    if (!desapilar_num(p, b)) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, (calc_num)pow((double)*a, (double)*b));
+    calc_num a, b;
+    if (!desapilar_num(p, &b)) return false;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, (calc_num)pow((double)a, (double)b));
     return true;
 }
 
 bool oper_log(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num));
-    calc_num* b = malloc(sizeof(calc_num));
-    
-    if (!a || !b) return false;
-    if (!desapilar_num(p, b)) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, (calc_num)(log((double)*a) / log((double)*b)));
+    calc_num a, b;
+    if (!desapilar_num(p, &b)) return false;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, (calc_num)(log((double)a) / log((double)b)));
     return true;
 }
 
 bool oper_raiz(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num));
-    if (!a) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, (calc_num)sqrt((double)*a));
+    calc_num a;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, (calc_num)sqrt((double)a));
     return true;
 }
 
 bool oper_tern(pilanum_t* p) {
-    calc_num* a = malloc(sizeof(calc_num));
-    calc_num* b = malloc(sizeof(calc_num));
-    calc_num* c = malloc(sizeof(calc_num));
+    calc_num a, b, c;
 
-    if (!a || !b) return false;
-    if (!desapilar_num(p, c)) return false;
-    if (!desapilar_num(p, b)) return false;
-    if (!desapilar_num(p, a)) return false;
-    apilar_num(p, *c ? *b : *a);
+    if (!desapilar_num(p, &c)) return false;
+    if (!desapilar_num(p, &b)) return false;
+    if (!desapilar_num(p, &a)) return false;
+    apilar_num(p, a ? b : c);
     return true;
 }
