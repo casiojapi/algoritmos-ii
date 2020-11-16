@@ -3,6 +3,7 @@
 
 #include "pila.h"
 
+#include <stddef.h>
 #include <stdbool.h>
 
 // Todas estás funciones están implemnetadas en calc_helper.c, y se pueden usar
@@ -95,6 +96,7 @@ typedef long int calc_num;  // Para tokens TOK_NUM
 
 typedef struct calc_oper {  // Para tokens TOK_OPER
     enum oper_type op;
+    size_t operandos;
     // AYUDA: la implementación de dc puede simplificarse en ciertos aspectos si
     // el struct que representa un operador incluye el número de operandos que
     // precisa. Se recomienda modificar calc_helper.c para que proporcione el
@@ -144,7 +146,6 @@ struct calc_token {
         calc_num value;      // Si "type" es TOK_NUM
         calc_operador oper;  // Si "type" es TOK_OPER
     };
-    size_t operandos;
 };
 
 

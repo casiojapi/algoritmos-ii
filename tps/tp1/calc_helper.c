@@ -1,6 +1,7 @@
-#include "calc_helper.h"
 
+#include "calc_helper.h"
 #include "strutil.h"
+
 
 #include <assert.h>
 #include <ctype.h>
@@ -8,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+
 
 
 //
@@ -39,27 +42,28 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
         char op = tok[0];
         if (op == '+') {
             parsed->oper.op = OP_ADD;
-            parsed->operandos = 2;
+            parsed->oper.operandos = 2;
         }
         else if (op == '-') {
             parsed->oper.op = OP_SUB;
-            parsed->operandos = 2;
+            parsed->oper.operandos = 2;
         }
         else if (op == '*') {
             parsed->oper.op = OP_MUL;
-            parsed->operandos = 2;
+            parsed->oper.operandos = 2;
+            
         }
         else if (op == '/') {
             parsed->oper.op = OP_DIV;
-            parsed->operandos = 2;
+            parsed->oper.operandos = 2;
         }
         else if (op == '^') {
             parsed->oper.op = OP_POW;
-            parsed->operandos = 2;
+            parsed->oper.operandos = 2;
         }
         else if (op == '?') {
             parsed->oper.op = OP_TERN;
-            parsed->operandos = 3;
+            parsed->oper.operandos = 3;
         }
         else if (op == '(') {
             parsed->type = TOK_LPAREN;
@@ -73,9 +77,11 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
     }
     else if (strcmp(tok, "log") == 0) {
         parsed->oper.op = OP_LOG;
+        parsed->oper.operandos = 2;
     }
     else if (strcmp(tok, "sqrt") == 0) {
         parsed->oper.op = OP_RAIZ;
+        parsed->oper.operandos = 1;
     }
     else {
         return false;

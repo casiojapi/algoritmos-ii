@@ -1,5 +1,5 @@
 all:
-	gcc -g -std=c99 -Wall -Wconversion -Wno-sign-conversion -Werror -o pruebas strutil.c
+	gcc -g -Wall -Wconversion -Wno-sign-conversion -Werror -o pruebas calc_helper.c strutil.c dc.c pila.c -lm
 mem:
 	valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./pruebas
 clean:
