@@ -39,21 +39,27 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
         char op = tok[0];
         if (op == '+') {
             parsed->oper.op = OP_ADD;
+            parsed->operandos = 2;
         }
         else if (op == '-') {
             parsed->oper.op = OP_SUB;
+            parsed->operandos = 2;
         }
         else if (op == '*') {
             parsed->oper.op = OP_MUL;
+            parsed->operandos = 2;
         }
         else if (op == '/') {
             parsed->oper.op = OP_DIV;
+            parsed->operandos = 2;
         }
         else if (op == '^') {
             parsed->oper.op = OP_POW;
+            parsed->operandos = 2;
         }
         else if (op == '?') {
             parsed->oper.op = OP_TERN;
+            parsed->operandos = 3;
         }
         else if (op == '(') {
             parsed->type = TOK_LPAREN;

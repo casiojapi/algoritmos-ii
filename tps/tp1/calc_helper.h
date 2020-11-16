@@ -144,6 +144,7 @@ struct calc_token {
         calc_num value;      // Si "type" es TOK_NUM
         calc_operador oper;  // Si "type" es TOK_OPER
     };
+    size_t operandos;
 };
 
 
