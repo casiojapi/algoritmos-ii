@@ -46,13 +46,12 @@ char *join(char **strv, char sep) {
         mem += lens[strs++];
     }
     if (!mem) {
-        char* c = calloc(1, sizeof(char));
+        char* c = malloc(sizeof(char));
         if (!c) return NULL;
-        c[0] = "\0";
+        *c = '\0';
         return c;
     }
     char* c = calloc(mem, sizeof(char));
-
     if (!c) return NULL;
     size_t index = 0;
     for (size_t i = 0; i < strs; i++) {
