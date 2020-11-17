@@ -84,6 +84,8 @@ enum oper_type {
     OP_LOG,   // logaritmo, "log"
     OP_RAIZ,  // raíz cuadrada, "sqrt"
     OP_TERN,  // operador ternario, ?:
+    OP_LPAREN,
+    OP_RPAREN
 };
 
 
@@ -91,27 +93,18 @@ enum oper_type {
  * También usamos un struct para definir los operadores y sus atributos.
  *
  */
+enum assoc {
+    ASSOC_LEFT,
+    ASSOC_RIGHT
+};
 
 typedef long int calc_num;  // Para tokens TOK_NUM
 
 typedef struct calc_oper {  // Para tokens TOK_OPER
     enum oper_type op;
     size_t operandos;
-    // AYUDA: la implementación de dc puede simplificarse en ciertos aspectos si
-    // el struct que representa un operador incluye el número de operandos que
-    // precisa. Se recomienda modificar calc_helper.c para que proporcione el
-    // número de operandos del operador, por ejemplo en un miembro "arity", o
-    // "num_operandos":
-    /**
-     * int num_operandos;
-     */
-    // Asimismo, la implementación de infix puede generalizarse bastante si el
-    // mismo struct del operador incluye también su precedencia y asociatividad,
-    // para comparar los atributos del token actual con los del tope de la pila:
-    /**
-     * unsigned precedencia;
-     * enum assoc asociatividad;  // p.ej. ASSOC_LEFT, ASSOC_RIGHT (a definir).
-     */
+    unsigned precedencia;
+    enum assoc asociatividad;  // p.ej. ASSOC_LEFT, ASSOC_RIGHT (a definir
 } calc_operador;
 
 

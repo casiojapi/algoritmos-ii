@@ -36,10 +36,14 @@ bool calculadora(char* linea) {
     char** strv = dc_split(linea);
     if (!strv) return false;
     struct calc_token *t = malloc(sizeof(struct calc_token));
-    if (!t) return false;
+    if (!t) {
+        free_strv(strv);
+        return false;
+    }
     pilanum_t* pila = pilanum_crear();
     if (!pila) {
         free(strv);
+        free(t);
         return false;
     }
     for (size_t i = 0; strv[i]; i++) {

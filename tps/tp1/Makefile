@@ -1,5 +1,5 @@
 all:
-	gcc -g -Wall -Wconversion -Wno-sign-conversion -Werror -o pruebas calc_helper.c strutil.c dc.c pila.c -lm
+	gcc -g -Wall -Wconversion -Wno-sign-conversion -Werror -o pruebas calc_helper.c strutil.c infix.c pila.c cola.c -lm
 mem:
 	valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./pruebas
 clean:

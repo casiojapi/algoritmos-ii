@@ -43,23 +43,33 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
         if (op == '+') {
             parsed->oper.op = OP_ADD;
             parsed->oper.operandos = 2;
+            parsed->oper.precedencia = 1;
+            parsed->oper.asociatividad = ASSOC_LEFT;
         }
         else if (op == '-') {
             parsed->oper.op = OP_SUB;
             parsed->oper.operandos = 2;
+            parsed->oper.precedencia = 1;
+            parsed->oper.asociatividad = ASSOC_LEFT;
         }
         else if (op == '*') {
             parsed->oper.op = OP_MUL;
             parsed->oper.operandos = 2;
+            parsed->oper.precedencia = 2;
+            parsed->oper.asociatividad = ASSOC_LEFT;
             
         }
         else if (op == '/') {
             parsed->oper.op = OP_DIV;
             parsed->oper.operandos = 2;
+            parsed->oper.precedencia = 2;
+            parsed->oper.asociatividad = ASSOC_LEFT;
         }
         else if (op == '^') {
             parsed->oper.op = OP_POW;
             parsed->oper.operandos = 2;
+            parsed->oper.precedencia = 3;
+            parsed->oper.asociatividad = ASSOC_RIGHT;
         }
         else if (op == '?') {
             parsed->oper.op = OP_TERN;
@@ -78,10 +88,12 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
     else if (strcmp(tok, "log") == 0) {
         parsed->oper.op = OP_LOG;
         parsed->oper.operandos = 2;
+        parsed->oper.asociatividad = ASSOC_LEFT;
     }
     else if (strcmp(tok, "sqrt") == 0) {
         parsed->oper.op = OP_RAIZ;
         parsed->oper.operandos = 1;
+        parsed->oper.asociatividad = ASSOC_LEFT;
     }
     else {
         return false;
