@@ -52,20 +52,36 @@ bool calculadora(char* linea) {
         }
         else if (t->type == TOK_OPER) {
             if (!operar(pila, t->oper, nums)) {
-                break;
+                free_strv(strv);
+                free(t);
+                pilanum_destruir(pila);
+                return false;
             }
-            nums = 1;
         }
         else if (t->type == TOK_LPAREN || t->type == TOK_RPAREN) {
-            // PROBLEMA DEL FUTURO.
+            // como no lo implemente, directamente tiro ERROR en caso de parentesis
+            return false;
         }
     }
     calc_num* res = malloc(sizeof(calc_num));
-    if (!res || !desapilar_num(pila, res)) {
+    if (!res) {     // esto creo que me quedo medio "codigo repetido", pero no se me ocurrio otra cosa la verdad. 
+        free_strv(strv);
+        free(t);
+        pilanum_destruir(pila);
+        return false;
+    }
+    if (!desapilar_num(pila, res)) {
         free_strv(strv);
         free(t);
         pilanum_destruir(pila);
         free(res);
+        return false;
+    }
+    if (!pila_esta_vacia(pila)) {
+        free_strv(strv);
+        free(t);
+        free(res);
+        pilanum_destruir(pila);
         return false;
     }
     fprintf(stdout, "%ld\n", *res);
@@ -78,47 +94,47 @@ bool calculadora(char* linea) {
 
 bool operar(pilanum_t* p, struct calc_oper oper, size_t nums) {
     if (oper.op == OP_ADD) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_suma(p);
         return true;
     }
     else if (oper.op == OP_SUB) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_resta(p);
         return true;
     }
     else if (oper.op == OP_MUL) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_multi(p);
         return true;
     }
     else if (oper.op == OP_DIV) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_div(p);
         return true;
     }
     else if (oper.op == OP_POW) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_pot(p);
         return true;
     }
     else if (oper.op == OP_LOG) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_log(p);
         return true;
     }
     else if (oper.op == OP_LOG) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_log(p);
         return true;
     }
     else if (oper.op == OP_RAIZ) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_raiz(p);
         return true;
     }
     else if (oper.op == OP_TERN) {
-        if (nums != oper.operandos) return false;
+        if (nums < oper.operandos) return false;
         oper_tern(p);
         return true;
     }
@@ -153,6 +169,7 @@ bool oper_div(pilanum_t* p) {
     calc_num a, b;
     if (!desapilar_num(p, &b)) return false;
     if (!desapilar_num(p, &a)) return false;
+    if (!b) return false;
     apilar_num(p, a / b);
     return true;
 }
@@ -161,6 +178,7 @@ bool oper_pot(pilanum_t* p) {
     calc_num a, b;
     if (!desapilar_num(p, &b)) return false;
     if (!desapilar_num(p, &a)) return false;
+    if (b < 0) return false;
     apilar_num(p, (calc_num)pow((double)a, (double)b));
     return true;
 }
@@ -169,6 +187,7 @@ bool oper_log(pilanum_t* p) {
     calc_num a, b;
     if (!desapilar_num(p, &b)) return false;
     if (!desapilar_num(p, &a)) return false;
+    if (b < 2) return false;
     apilar_num(p, (calc_num)(log((double)a) / log((double)b)));
     return true;
 }
@@ -176,6 +195,7 @@ bool oper_log(pilanum_t* p) {
 bool oper_raiz(pilanum_t* p) {
     calc_num a;
     if (!desapilar_num(p, &a)) return false;
+    if (a < 0) return false;
     apilar_num(p, (calc_num)sqrt((double)a));
     return true;
 }
