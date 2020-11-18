@@ -83,9 +83,9 @@ enum oper_type {
     OP_POW,   // potencia, ^
     OP_LOG,   // logaritmo, "log"
     OP_RAIZ,  // raíz cuadrada, "sqrt"
-    OP_TERN,  // operador ternario, ?:
-    OP_LPAREN,
-    OP_RPAREN
+    OP_TERN  // operador ternario, ?:
+    //OP_LPAREN,
+    //OP_RPAREN
 };
 
 
@@ -183,5 +183,7 @@ void apilar_num(pilanum_t *pila, calc_num num);
  */
 
 bool desapilar_num(pilanum_t *pila, calc_num *num);
+
+struct calc_token* token_copiar(struct calc_token* a_copiar);
 
 #endif

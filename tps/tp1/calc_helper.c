@@ -239,3 +239,22 @@ static bool parse_num(const char *tok, calc_num *dest) {
     *dest = strtol(tok, &end, 10);
     return *end == '\0';
 }
+
+// funcion para copiar un struct calc_token. 
+//
+// arg: recibe el token a copiar.
+// si se puede pedir la memoria y el token a copiar es valido, devuelve la copia.
+// si no se cumplen las condiciones previas, devuelve NULL.
+struct calc_token* token_copiar(struct calc_token* a_copiar) {
+    if (!a_copiar) return NULL;
+    struct calc_token* t = malloc(sizeof(struct calc_token));
+    if (!t) return NULL;
+    t->type = a_copiar->type;
+    t->value = a_copiar->value;
+    t->oper = a_copiar->oper;
+    t->oper.precedencia = a_copiar->oper.precedencia;
+    t->oper.operandos = a_copiar->oper.operandos;
+    t->oper.op = a_copiar->oper.op;
+    t->oper.asociatividad = a_copiar->oper.operandos;
+    return t;
+}

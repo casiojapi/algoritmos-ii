@@ -12,6 +12,7 @@
 #define MAX_STR 100
 
 bool conversor(char* linea);
+bool print_output(cola_t*);
 
 int main(void) {
     char aux[MAX_STR];
@@ -27,7 +28,7 @@ int main(void) {
 bool conversor(char* linea) {
     char** strv = infix_split(linea);
     if (!strv) return false;
-    struct calc_token *t = malloc(sizeof(struct calc_token));
+    struct calc_token *t = calloc(1, sizeof(struct calc_token));
     if (!t) {
         free_strv(strv);
         return false;
@@ -40,99 +41,146 @@ bool conversor(char* linea) {
     }
     pila_t* operadores = pila_crear();
     if (!operadores) {
-        cola_destruir(output, NULL);
-        free(output);
-        free(t);
-        free_strv(strv);
-        return false;
+                cola_destruir(output, NULL);
+                free(t);
+                free_strv(strv);
+                return false;
     }
     for (size_t i = 0; strv[i]; i++) {
         if (!calc_parse(strv[i], t)) {
             break;
         }
         else if (t->type == TOK_NUM) {
-            calc_num* valor = malloc(sizeof(calc_num));
+            struct calc_token* valor = token_copiar(t);
             if (!valor) {
                 cola_destruir(output, free);
                 pila_destruir(operadores);
-                free(operadores);
-                free(output);
                 free(t);
                 free_strv(strv);
                 return false;
             }
-            *valor = t->value;
             if (!cola_encolar(output, valor)) {
+                free(valor);
                 cola_destruir(output, free);
                 pila_destruir(operadores);
-                free(operadores);
-                free(output);
                 free(t);
                 free_strv(strv);
                 return false;
             }
         }
-        else if (t->type == TOK_OPER) {
-            while (!pila_esta_vacia(operadores)) {
-                struct calc_oper* tope_oper = pila_ver_tope(operadores);
-                while ((tope_oper->precedencia > t->oper.precedencia) || (((tope_oper->precedencia == t->oper.precedencia) && (t->oper.asociatividad == ASSOC_LEFT)) && (t->oper.op != OP_LPAREN))) {
-                    while (pila_esta_vacia(operadores)) {
+        else if (t->type == TOK_OPER) {     // aca implemente el shunting-yard que esta en wikipedia
+                struct calc_token* tope_token = pila_ver_tope(operadores);
+                while ((!pila_esta_vacia(operadores)) && (((tope_token->oper.precedencia > t->oper.precedencia) || ((tope_token->oper.precedencia == t->oper.precedencia) && (t->oper.asociatividad == ASSOC_LEFT))) && (t->type != TOK_LPAREN))) {
                         if (!cola_encolar(output, pila_desapilar(operadores))) {
-                            free(tope_oper);
+                            free(tope_token);
                             cola_destruir(output, free);
                             pila_destruir(operadores);
-                            free(operadores);
-                            free(output);
                             free(t);
                             free_strv(strv);
                             return false;
                         }
+                    tope_token = pila_ver_tope(operadores);
+                }
+            struct calc_token* nuevo_oper = token_copiar(t);
+            if (!nuevo_oper) {
+                cola_destruir(output, free);
+                pila_destruir(operadores);
+                free(t);
+                free_strv(strv);
+                return false;
+            }
+            pila_apilar(operadores, nuevo_oper);
+        }
+
+        else if (t->type == TOK_LPAREN) {
+            struct calc_token* nuevo_oper = token_copiar(t);
+            if (!nuevo_oper) {
+                cola_destruir(output, free);
+                pila_destruir(operadores);
+                free(t);
+                free_strv(strv);
+                return false;
+            }
+            pila_apilar(operadores, nuevo_oper);
+        }
+
+        else if (t->type == TOK_RPAREN) {
+            while (!pila_esta_vacia(operadores)) {
+                struct calc_token* tope_token = pila_ver_tope(operadores);
+                while (tope_token->type != TOK_LPAREN && !pila_esta_vacia(operadores)) {
+                    if (!cola_encolar(output, pila_desapilar(operadores))) {
+                        free(tope_token);
+                        cola_destruir(output, free);
+                        pila_destruir(operadores);
+                        free(t);
+                        free_strv(strv);
+                        return false;
                     }
                 }
-                
             }
-            struct calc_oper* nuevo_oper = malloc(sizeof(struct calc_oper));
-            
-            if (!nuevo_oper) {
-                free(operadores);
-                free(output);
-                free(t);
-                free_strv(strv);
-                return false;
-            }
-            nuevo_oper->asociatividad = t->oper.asociatividad;
-            nuevo_oper->op = t->oper.op;
-            nuevo_oper->operandos = t->oper.operandos;
-            nuevo_oper->precedencia = t->oper.precedencia;
-            pila_apilar(operadores, nuevo_oper);
-        }
-        else if (t->type == TOK_LPAREN) {
-            struct calc_oper* nuevo_oper = malloc(sizeof(struct calc_oper));
-            if (!nuevo_oper) {
-                free(operadores);
-                free(output);
-                free(t);
-                free_strv(strv);
-                return false;
-            }
-            pila_apilar(operadores, nuevo_oper);
         }
     }
+    while (!pila_esta_vacia(operadores)) {
+        if (!cola_encolar(output, pila_desapilar(operadores))) {
+            cola_destruir(output, free);
+            pila_destruir(operadores);
+            free(t);
+            free_strv(strv);
+            return false;
+        }
+    }
+    if (!print_output(output)) {
+        cola_destruir(output, free);
+        pila_destruir(operadores);
+        free(t);
+        free_strv(strv);
+        return false;
+    }
+    free(t);
+    cola_destruir(output, NULL);
+    pila_destruir(operadores);
+    free_strv(strv);
     return true;
 }
-/*
-else if the token is a left parenthesis (i.e. "("), then:
-        push it onto the operator stack.
-    else if the token is a right parenthesis (i.e. ")"), then:
-        while the operator at the top of the operator stack is not a left parenthesis:
-            pop the operator from the operator stack onto the output queue.
-         If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. 
-        if there is a left parenthesis at the top of the operator stack, then:
-            pop the operator from the operator stack and discard it
-  After while loop, if operator stack not null, pop everything to output queue 
-if there are no more tokens to read then:
-    while there are still operator tokens on the stack:
-         If the operator token on the top of the stack is a parenthesis, then there are mismatched parentheses. 
-        pop the operator from the operator stack onto the output queue.
-exit.
-*/
+
+bool print_output(cola_t* output) {
+    while (!cola_esta_vacia(output)) {
+        struct calc_token* out = cola_desencolar(output);
+        if (out->type == TOK_NUM) {
+            fprintf(stdout, "%ld ", out->value);
+        }
+        else if (out->type == TOK_OPER) {
+            if (out->oper.op == OP_ADD) {
+                fprintf(stdout, "+ ");
+            }
+            else if (out->oper.op == OP_SUB) {
+                fprintf(stdout, "- ");
+            }
+            else if (out->oper.op == OP_MUL) {
+                fprintf(stdout, "* ");
+            }
+            else if (out->oper.op == OP_DIV) {
+                fprintf(stdout, "/ ");
+            }
+            else if (out->oper.op == OP_POW) {
+                fprintf(stdout, "^ ");
+            }
+            else if (out->oper.op == OP_LOG) {
+                fprintf(stdout, "log ");
+            }
+            else if (out->oper.op == OP_RAIZ) {
+                fprintf(stdout, "sqrt ");
+            }
+            else if (out->oper.op == OP_TERN) {
+                fprintf(stdout, "? ");
+            }
+            else {
+                fprintf(stderr, "ERROR\n");
+                return false;
+            }
+        }
+        free(out);
+    }
+    fprintf(stdout, "\n");
+    return true;
+}
