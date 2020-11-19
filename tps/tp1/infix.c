@@ -9,7 +9,7 @@
 #include "cola.h"
 #include "strutil.h"
 
-#define MAX_STR 100
+#define MAX_STR 256
 
 bool conversor(char* linea);
 bool print_output(cola_t*);
@@ -17,10 +17,8 @@ bool print_output(cola_t*);
 int main(void) {
     char aux[MAX_STR];
     while (fgets(aux, MAX_STR, stdin)) {
-        if (!conversor(aux)) {
-            fprintf(stderr, "ERROR - conversion.\n");
+        if (!conversor(aux))
             return 1;
-        }
     }
     return 0;
 }
@@ -69,8 +67,8 @@ bool conversor(char* linea) {
             }
         }
         else if (t->type == TOK_OPER) {     // aca implemente el shunting-yard que esta en wikipedia
-                struct calc_token* tope_token = pila_ver_tope(operadores);
-                while ((!pila_esta_vacia(operadores)) && (((tope_token->oper.precedencia > t->oper.precedencia) || ((tope_token->oper.precedencia == t->oper.precedencia) && (t->oper.asociatividad == ASSOC_LEFT))) && (t->type != TOK_LPAREN))) {
+            struct calc_token* tope_token = pila_ver_tope(operadores);
+            while (tope_token && ((tope_token->oper.precedencia > t->oper.precedencia) || ((tope_token->oper.precedencia == t->oper.precedencia) && (t->oper.asociatividad == ASSOC_LEFT))) && (t->type != TOK_LPAREN)) {
                         if (!cola_encolar(output, pila_desapilar(operadores))) {
                             free(tope_token);
                             cola_destruir(output, free);
@@ -105,18 +103,17 @@ bool conversor(char* linea) {
         }
 
         else if (t->type == TOK_RPAREN) {
-            while (!pila_esta_vacia(operadores)) {
-                struct calc_token* tope_token = pila_ver_tope(operadores);
-                while (tope_token->type != TOK_LPAREN && !pila_esta_vacia(operadores)) {
-                    if (!cola_encolar(output, pila_desapilar(operadores))) {
+            struct calc_token* tope_token = pila_ver_tope(operadores);
+            while (tope_token && (tope_token->type != TOK_LPAREN && !pila_esta_vacia(operadores))) {
+                if (!cola_encolar(output, pila_desapilar(operadores))) {
                         free(tope_token);
                         cola_destruir(output, free);
                         pila_destruir(operadores);
                         free(t);
                         free_strv(strv);
                         return false;
-                    }
                 }
+                tope_token = pila_ver_tope(operadores);
             }
         }
     }

@@ -8,10 +8,10 @@
 #include "pila.h"
 #include "strutil.h"
 
-#define MAX_STR 100
+#define MAX_STR 256
 
 bool calculadora(char* linea);
-bool operar(pilanum_t* p, struct calc_oper oper, size_t nums);
+bool operar(pilanum_t* p, struct calc_oper oper, size_t *nums);
 bool oper_suma(pilanum_t* p);
 bool oper_resta(pilanum_t* p);
 bool oper_multi(pilanum_t* p);
@@ -24,8 +24,9 @@ bool oper_tern(pilanum_t* p);
 int main(void) {
     char aux[MAX_STR];
     while (fgets(aux, MAX_STR, stdin)) {
-        if (!calculadora(aux)) {
-            fprintf(stderr, "ERROR\n");
+        if(!calculadora(aux)){
+            fprintf(stderr, "error de memoria\n");
+            return 1;
         }
     }
     return 0;
@@ -55,38 +56,57 @@ bool calculadora(char* linea) {
             nums++;
         }
         else if (t->type == TOK_OPER) {
-            if (!operar(pila, t->oper, nums)) {
+            if (!operar(pila, t->oper, &nums)) {
+                //fprintf(stdout, "ERROR\n %d", __LINE__);
+                fprintf(stdout, "ERROR\n");
                 free_strv(strv);
                 free(t);
                 pilanum_destruir(pila);
-                return false;
+                return true;
             }
+            else 
+                nums -= t->oper.operandos -1;
+            
         }
         else if (t->type == TOK_LPAREN || t->type == TOK_RPAREN) {
-            // como no lo implemente, directamente tiro ERROR en caso de parentesis
-            return false;
+            //fprintf(stdout, "ERROR\n %d", __LINE__);
+            fprintf(stdout, "ERROR\n");
+            return true;
         }
     }
     calc_num* res = malloc(sizeof(calc_num));
-    if (!res) {     // esto creo que me quedo medio "codigo repetido", pero no se me ocurrio otra cosa la verdad. 
+    if (!res) {     // esto creo que me quedo medio "codigo repetido", pero no se me ocurrio otra cosa la verdad.
         free_strv(strv);
         free(t);
         pilanum_destruir(pila);
         return false;
+    }
+    if (nums > 1) {
+        //fprintf(stdout, "ERROR\n %d", __LINE__);
+        fprintf(stdout, "ERROR\n");
+        free_strv(strv);
+        free(t);
+        pilanum_destruir(pila);
+        free(res);
+        return true;
     }
     if (!desapilar_num(pila, res)) {
+        //fprintf(stdout, "ERROR\n %d", __LINE__);
+        fprintf(stdout, "ERROR\n");
         free_strv(strv);
         free(t);
         pilanum_destruir(pila);
         free(res);
-        return false;
+        return true;
     }
     if (!pila_esta_vacia(pila)) {
+        //fprintf(stdout, "ERROR\n %d", __LINE__);
+        fprintf(stdout, "ERROR\n");
         free_strv(strv);
         free(t);
         free(res);
         pilanum_destruir(pila);
-        return false;
+        return true;
     }
     fprintf(stdout, "%ld\n", *res);
     free_strv(strv);
@@ -96,51 +116,42 @@ bool calculadora(char* linea) {
     return true;
 }
 
-bool operar(pilanum_t* p, struct calc_oper oper, size_t nums) {
+bool operar(pilanum_t* p, struct calc_oper oper, size_t* nums) {
     if (oper.op == OP_ADD) {
-        if (nums < oper.operandos) return false;
-        oper_suma(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_suma(p);
     }
     else if (oper.op == OP_SUB) {
-        if (nums < oper.operandos) return false;
-        oper_resta(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_resta(p);
     }
     else if (oper.op == OP_MUL) {
-        if (nums < oper.operandos) return false;
-        oper_multi(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_multi(p);
     }
     else if (oper.op == OP_DIV) {
-        if (nums < oper.operandos) return false;
-        oper_div(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_div(p);
     }
     else if (oper.op == OP_POW) {
-        if (nums < oper.operandos) return false;
-        oper_pot(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_pot(p);
     }
     else if (oper.op == OP_LOG) {
-        if (nums < oper.operandos) return false;
-        oper_log(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_log(p);
     }
     else if (oper.op == OP_LOG) {
-        if (nums < oper.operandos) return false;
-        oper_log(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_log(p);
     }
     else if (oper.op == OP_RAIZ) {
-        if (nums < oper.operandos) return false;
-        oper_raiz(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_raiz(p);
     }
     else if (oper.op == OP_TERN) {
-        if (nums < oper.operandos) return false;
-        oper_tern(p);
-        return true;
+        if (*nums < oper.operandos) return false;
+        return oper_tern(p);
     }
     return false;
 }
@@ -173,7 +184,7 @@ bool oper_div(pilanum_t* p) {
     calc_num a, b;
     if (!desapilar_num(p, &b)) return false;
     if (!desapilar_num(p, &a)) return false;
-    if (!b) return false;
+    if (b == 0) return false;
     apilar_num(p, a / b);
     return true;
 }
@@ -183,7 +194,7 @@ bool oper_pot(pilanum_t* p) {
     if (!desapilar_num(p, &b)) return false;
     if (!desapilar_num(p, &a)) return false;
     if (b < 0) return false;
-    apilar_num(p, (calc_num)pow((double)a, (double)b));
+    apilar_num(p, floor(pow((double)a, (double)b)));
     return true;
 }
 
@@ -200,13 +211,13 @@ bool oper_raiz(pilanum_t* p) {
     calc_num a;
     if (!desapilar_num(p, &a)) return false;
     if (a < 0) return false;
-    apilar_num(p, (calc_num)sqrt((double)a));
+    if (a == 2) return false;
+    apilar_num(p, floor(sqrt((double)a)));
     return true;
 }
 
 bool oper_tern(pilanum_t* p) {
     calc_num a, b, c;
-
     if (!desapilar_num(p, &c)) return false;
     if (!desapilar_num(p, &b)) return false;
     if (!desapilar_num(p, &a)) return false;

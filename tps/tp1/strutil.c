@@ -16,10 +16,9 @@ char *substr(const char *str, size_t n) {
 }
 
 char **split(const char *str, char sep) {
-    if (!str) {
-        printf("NULLLLLLLLLLLLLLLL\n");
+    if (!str)
         return NULL;
-    } 
+
     size_t n = strlen(str);
     size_t cadenas = 0;
     char** cc = NULL;
@@ -34,6 +33,7 @@ char **split(const char *str, char sep) {
     indices[++cadenas] = n + 1;
     cc = malloc(sizeof(char*) * (cadenas + 1));
     if (!cc) return NULL;
+
     for (size_t i = 0; i < cadenas; i++) {
         cc[i] = substr(str + indices[i], indices[i + 1] - indices[i] - 1);
     }
@@ -46,9 +46,8 @@ char *join(char **strv, char sep) {
     if (!strv) return strdup("");
 
     char no_null = 1;
-    if (sep == '\0') {
+    if (sep == '\0')
         no_null = 0;
-    }
 
     size_t lens[MAX_IND];
     for (size_t i = 0; strv[i]; i++) {
