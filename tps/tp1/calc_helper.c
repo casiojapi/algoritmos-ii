@@ -43,63 +43,71 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
         if (op == '+') {
             parsed->oper.op = OP_ADD;
             parsed->oper.operandos = 2;
-            parsed->oper.precedencia = 1;
+            parsed->oper.precedencia = 2;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            return true;
         }
         else if (op == '-') {
             parsed->oper.op = OP_SUB;
             parsed->oper.operandos = 2;
-            parsed->oper.precedencia = 1;
+            parsed->oper.precedencia = 2;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            return true;
         }
         else if (op == '*') {
             parsed->oper.op = OP_MUL;
             parsed->oper.operandos = 2;
-            parsed->oper.precedencia = 2;
+            parsed->oper.precedencia = 3;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            return true;
             
         }
         else if (op == '/') {
             parsed->oper.op = OP_DIV;
             parsed->oper.operandos = 2;
-            parsed->oper.precedencia = 2;
+            parsed->oper.precedencia = 3;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            return true;
         }
         else if (op == '^') {
             parsed->oper.op = OP_POW;
             parsed->oper.operandos = 2;
-            parsed->oper.precedencia = 3;
+            parsed->oper.precedencia = 4;
             parsed->oper.asociatividad = ASSOC_RIGHT;
+            return true;
         }
         else if (op == '?') {
             parsed->oper.op = OP_TERN;
             parsed->oper.operandos = 3;
+            return true;
         }
         else if (op == '(') {
             parsed->type = TOK_LPAREN;
+            parsed->oper.precedencia = 0;
+            parsed->oper.asociatividad = ASSOC_PAREN;
+            return true;
         }
         else if (op == ')') {
             parsed->type = TOK_RPAREN;
+            parsed->oper.precedencia = 0;
+            parsed->oper.asociatividad = ASSOC_LEFT;
+            return true;
         }
-        else {
-            return false;
-        }
+        return false;
     }
     else if (strcmp(tok, "log") == 0) {
         parsed->oper.op = OP_LOG;
         parsed->oper.operandos = 2;
         parsed->oper.asociatividad = ASSOC_LEFT;
+        return true;
     }
     else if (strcmp(tok, "sqrt") == 0) {
         parsed->oper.op = OP_RAIZ;
         parsed->oper.operandos = 1;
         parsed->oper.asociatividad = ASSOC_LEFT;
+        return true;
     }
-    else {
-        return false;
-    }
-
-    return true;
+    return false;
 }
 
 

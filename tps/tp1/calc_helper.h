@@ -95,7 +95,8 @@ enum oper_type {
  */
 enum assoc {
     ASSOC_LEFT,
-    ASSOC_RIGHT
+    ASSOC_RIGHT,
+    ASSOC_PAREN
 };
 
 typedef long int calc_num;  // Para tokens TOK_NUM

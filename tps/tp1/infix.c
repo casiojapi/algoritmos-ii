@@ -9,18 +9,20 @@
 #include "cola.h"
 #include "strutil.h"
 
-#define MAX_STR 256
+#define MAX_STR 1429496729600
 
 bool conversor(char* linea);
-bool print_output(cola_t*);
+void print_output(cola_t*);
+size_t tok_prec(struct calc_token* t);
 
 int main(void) {
-    char aux[MAX_STR];
-    while (fgets(aux, MAX_STR, stdin)) {
-        if (!conversor(aux))
+    char* linea = NULL;
+	size_t n = 0;
+	while (getline(&linea, &n, stdin) != -1)
+		if (!conversor(linea))
             return 1;
-    }
-    return 0;
+	free(linea);
+	return 0;
 }
 
 bool conversor(char* linea) {
@@ -67,18 +69,18 @@ bool conversor(char* linea) {
             }
         }
         else if (t->type == TOK_OPER) {     // aca implemente el shunting-yard que esta en wikipedia
-            struct calc_token* tope_token = pila_ver_tope(operadores);
-            while (tope_token && ((tope_token->oper.precedencia > t->oper.precedencia) || ((tope_token->oper.precedencia == t->oper.precedencia) && (t->oper.asociatividad == ASSOC_LEFT))) && (t->type != TOK_LPAREN)) {
-                        if (!cola_encolar(output, pila_desapilar(operadores))) {
-                            free(tope_token);
-                            cola_destruir(output, free);
-                            pila_destruir(operadores);
-                            free(t);
-                            free_strv(strv);
-                            return false;
-                        }
-                    tope_token = pila_ver_tope(operadores);
+            struct calc_token* tope = pila_ver_tope(operadores);
+            while (tope && ((tok_prec(tope) > tok_prec(t)) || ((tok_prec(tope) == tok_prec(t)) && (t->oper.asociatividad != ASSOC_RIGHT))) && (t->type != TOK_LPAREN)) {
+                if (!cola_encolar(output, pila_desapilar(operadores))) {
+                    free(tope);
+                    cola_destruir(output, free);
+                    pila_destruir(operadores);
+                    free(t);
+                    free_strv(strv);
+                    return false;
                 }
+                tope = pila_ver_tope(operadores);
+            }
             struct calc_token* nuevo_oper = token_copiar(t);
             if (!nuevo_oper) {
                 cola_destruir(output, free);
@@ -90,7 +92,7 @@ bool conversor(char* linea) {
             pila_apilar(operadores, nuevo_oper);
         }
 
-        else if (t->type == TOK_LPAREN) {
+        else if (t->type == TOK_LPAREN) {   
             struct calc_token* nuevo_oper = token_copiar(t);
             if (!nuevo_oper) {
                 cola_destruir(output, free);
@@ -103,18 +105,20 @@ bool conversor(char* linea) {
         }
 
         else if (t->type == TOK_RPAREN) {
-            struct calc_token* tope_token = pila_ver_tope(operadores);
-            while (tope_token && (tope_token->type != TOK_LPAREN && !pila_esta_vacia(operadores))) {
+            struct calc_token* tope = pila_ver_tope(operadores);
+            while (tope && (tope->type != TOK_LPAREN/* && !pila_esta_vacia(operadores)*/)) {
                 if (!cola_encolar(output, pila_desapilar(operadores))) {
-                        free(tope_token);
+                        free(tope);
                         cola_destruir(output, free);
                         pila_destruir(operadores);
                         free(t);
                         free_strv(strv);
                         return false;
                 }
-                tope_token = pila_ver_tope(operadores);
+                tope = pila_ver_tope(operadores);
             }
+            tope = pila_desapilar(operadores);
+            free(tope);
         }
     }
     while (!pila_esta_vacia(operadores)) {
@@ -126,13 +130,7 @@ bool conversor(char* linea) {
             return false;
         }
     }
-    if (!print_output(output)) {
-        cola_destruir(output, free);
-        pila_destruir(operadores);
-        free(t);
-        free_strv(strv);
-        return false;
-    }
+    print_output(output);
     free(t);
     cola_destruir(output, NULL);
     pila_destruir(operadores);
@@ -140,7 +138,7 @@ bool conversor(char* linea) {
     return true;
 }
 
-bool print_output(cola_t* output) {
+void print_output(cola_t* output) {
     while (!cola_esta_vacia(output)) {
         struct calc_token* out = cola_desencolar(output);
         if (out->type == TOK_NUM) {
@@ -171,13 +169,13 @@ bool print_output(cola_t* output) {
             else if (out->oper.op == OP_TERN) {
                 fprintf(stdout, "? ");
             }
-            else {
-                fprintf(stderr, "ERROR\n");
-                return false;
-            }
         }
         free(out);
     }
     fprintf(stdout, "\n");
-    return true;
+    return;
+}
+
+size_t tok_prec(struct calc_token* t) {
+    return t->oper.precedencia;
 }
