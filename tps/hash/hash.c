@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "hash.h"
-#define CAP_INIC 33
+#define CAPACIDAD_INICIAL 33
 
 typedef enum estado {
     VACIO,
@@ -17,16 +17,36 @@ typedef struct hash_memb {
     char* clave;
     void* dato;
     estado_t estado;
-} hash_memb_t;
+} hash_elem_t;
 
 
 struct hash {
-    hash_memb_t* tabla;
+    hash_elem_t* tabla;
     size_t capacidad, cantidad, borrados;
     hash_destruir_dato_t destruir_dato;
 };  
 
-
+// En esta funcion se me ocurrieron bastantes cosas, principalmente, crear un nuevo hash. 
+// Pero iba a tener que usar hash guardar por lo que terminaria quedando una llamada recursiva a redimensionar, y preferi hacerlo a pedal.
+bool hash_redimensionar(hash_t* hash, size_t nuevo_tam) {    
+    hash_elem_t* tabla_post = calloc(nuevo_tam, sizeof(hash_elem_t));
+    if (!tabla_post) return false;
+    hash_elem_t* tabla_pre = hash->tabla;
+    size_t capacidad_pre;
+    hash->tabla = tabla_post;
+    hash->capacidad = nuevo_tam;
+    hash->cantidad = 0;
+    for (size_t i = 0; i < capacidad_pre; i++) {
+        if (tabla_pre[i].estado == OCUPADO) {
+            if (!hash_guardar(hash, tabla_pre[i].clave, tabla_pre[i].dato))
+                return false;
+        }
+    }
+    return true;
+}
+// Si ya existe una clave en el hash, devuelve su posicion, y un bool "existia" true por la interfaz.
+// De no existir previamente, devuelve la primer posicion disponible para agregar el elemento a la tabla, y el bool devuelto por la interfaz como false. 
+size_t hash_buscar_clave(hash_t* hash, char* clave, size_t pos, bool* existia);
 // Voy a usar djb2
 // fuente: http://www.cse.yorku.ca/~oz/hash.html#djb2
 
@@ -43,12 +63,12 @@ unsigned long f_hash(char *str) {
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato) {
     hash_t* h = calloc(1, sizeof(hash_t));
     if (!h) return NULL;
-    h->tabla = calloc(CAP_INIC, sizeof(hash_memb_t));
+    h->tabla = calloc(CAPACIDAD_INICIAL, sizeof(hash_elem_t));
     if (!h->tabla) {
         free(h);
         return NULL;
     }
-    h->capacidad = CAP_INIC;
+    h->capacidad = CAPACIDAD_INICIAL;
     h->destruir_dato = destruir_dato;
     return h;
 }
@@ -59,40 +79,69 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato) {
  * Post: Se almacenó el par (clave, dato)
  */
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
-    // if cant / cap >= 0.7 redimensiona * 2
-    size_t pos = f_hash(clave) % hash->capacidad;
-    while (hash->tabla[pos].estado == OCUPADO) {
-        pos *= pos;
-        if (pos > hash->capacidad)
-            pos %= hash->capacidad;
+    if ((hash->cantidad / hash->capacidad) >= 0.7)  // cuando el factor de carga es mayor a 0.7, redimensiono.
+        if (!hash_redimensionar(hash, hash->capacidad * 2))
+            return false;
+    bool existia;
+    size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &existia);
+    if (existia) {
+        if (hash->destruir_dato)
+            hash->destruir_dato(hash->tabla[pos].dato);
+        hash->tabla[pos].dato = dato;
+    } else {
+        hash->tabla[pos].dato = dato;
+        hash->tabla[pos].clave = clave;
+        hash->tabla[pos].estado = OCUPADO;
+        hash->cantidad++;
     }
-    
+    return true;
 }
-
-
 /* Borra un elemento del hash y devuelve el dato asociado.  Devuelve
- * NULL si el dato no estaba.
+
  * Pre: La estructura hash fue inicializada
+ * NULL si el dato no estaba.
+
  * Post: El elemento fue borrado de la estructura y se lo devolvió,
  * en el caso de que estuviera guardado.
  */
-void *hash_borrar(hash_t *hash, const char *clave);
+void *hash_borrar(hash_t *hash, const char *clave) {
+    bool pertenece;
+    size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &pertenece);
+    if (!pertenece) return NULL;
+    void* dato = hash->tabla[pos].dato;
+    free(hash->tabla[pos].clave);
+    hash->tabla[pos].estado = BORRADO;
+    hash->tabla[pos].dato = NULL;
+    hash->cantidad--;
+    return dato;
+}
 
 /* Obtiene el valor de un elemento del hash, si la clave no se encuentra
  * devuelve NULL.
  * Pre: La estructura hash fue inicializada
  */
-void *hash_obtener(const hash_t *hash, const char *clave);
+void *hash_obtener(const hash_t *hash, const char *clave) {
+    bool pertenece;
+    size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &pertenece);
+    if (!pertenece) return NULL;
+    return hash->tabla[pos].dato;
+}
 
 /* Determina si clave pertenece o no al hash.
  * Pre: La estructura hash fue inicializada
  */
-bool hash_pertenece(const hash_t *hash, const char *clave);
+bool hash_pertenece(const hash_t *hash, const char *clave) {
+    bool pertenece;
+    size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &pertenece);
+    return pertenece;
+}
 
 /* Devuelve la cantidad de elementos del hash.
  * Pre: La estructura hash fue inicializada
  */
-size_t hash_cantidad(const hash_t *hash);
+size_t hash_cantidad(const hash_t *hash) {
+    return hash->cantidad;
+}
 
 /* Destruye la estructura liberando la memoria pedida y llamando a la función
  * destruir para cada par (clave, dato).
@@ -101,10 +150,29 @@ size_t hash_cantidad(const hash_t *hash);
  */
 void hash_destruir(hash_t *hash) {
     for (size_t i = 0; i < hash->capacidad;  i++) {
-        if (hash->tabla[i].estado == OCUPADO && hash->destruir_dato) {
-            hash->destruir_dato(hash->tabla[i].dato);
-        }
+        if (hash->tabla[i].estado == OCUPADO)
+            free(hash->tabla[i].clave);
+            if (hash->destruir_dato)
+                hash->destruir_dato(hash->tabla[i].dato);
     }
     free(hash->tabla);
     free(hash);
+}
+
+size_t hash_buscar_clave(hash_t* hash, char* clave, size_t pos, bool* existia) {
+    size_t i = 0, espacio_libre = 0;
+    *existia = false;
+    while (i < hash->capacidad) {
+        if (!espacio_libre && hash->tabla[pos].estado == VACIO || hash->tabla[pos].estado == BORRADO)
+            espacio_libre = pos;
+        if (hash->tabla[pos].estado == OCUPADO && !strcmp(clave, hash->tabla[pos].clave)) {
+            *existia = true;
+            return pos;
+        }
+        i++;
+        pos++;
+        if (pos == hash->capacidad)
+            pos = 0;
+    }
+    return espacio_libre;
 }
