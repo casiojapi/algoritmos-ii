@@ -107,9 +107,9 @@ size_t hash_cantidad(const hash_t *hash) {
 void hash_destruir(hash_t *hash) {
     for (size_t i = 0; i < hash->capacidad;  i++) {
         if (hash->tabla[i].estado == OCUPADO) {
-            free(hash->tabla[i].clave);
+            void* dato = hash_borrar(hash, hash->tabla[i].clave);
             if (hash->destruir_dato)
-                hash->destruir_dato(hash->tabla[i].dato);
+                hash->destruir_dato(dato);
         }
     }
     free(hash->tabla);
@@ -127,7 +127,7 @@ hash_iter_t *hash_iter_crear(const hash_t *hash) {
     hash_iter_t* iter = malloc(sizeof(hash_iter_t));
     if (!iter) return NULL;
     iter->hash = (hash_t*)hash;
-    iter->actual = 0;
+    iter->actual = hash_proximo(hash, 0);
     iter->recorridos = 0;
     return iter;
 }
@@ -135,8 +135,11 @@ hash_iter_t *hash_iter_crear(const hash_t *hash) {
 bool hash_iter_avanzar(hash_iter_t *iter) {
     if (hash_iter_al_final(iter)) return false;
     size_t prox = hash_proximo(iter->hash, iter->actual);
-    if (iter->actual == prox) 
-        return false;
+    if (iter->actual == prox) {
+        iter->actual = iter->hash->capacidad -1;
+        iter->recorridos++;
+        return true;
+    }
     iter->actual = prox;
     iter->recorridos++;
     return true;
@@ -144,12 +147,15 @@ bool hash_iter_avanzar(hash_iter_t *iter) {
 
 const char *hash_iter_ver_actual(const hash_iter_t *iter) {
     if (hash_iter_al_final(iter)) return NULL;
-    return strdup(iter->hash->tabla[iter->actual].clave);
+    return iter->hash->tabla[iter->actual].clave;
 }
 
 bool hash_iter_al_final(const hash_iter_t *iter) {
-    size_t pos = hash_proximo(iter->hash, iter->actual);
-    return pos == iter->actual;
+    // size_t pos = hash_proximo(iter->hash, iter->actual);
+    // return pos == iter->actual;
+    return iter->hash->cantidad == iter->recorridos;
+    // return iter->actual == iter->hash->capacidad -1;
+    // return (iter->hash->tabla + iter->actual) == NULL;
 }
 
 void hash_iter_destruir(hash_iter_t *iter) {
@@ -162,8 +168,11 @@ void hash_iter_destruir(hash_iter_t *iter) {
 // Pre: Recibe un hash inicializado.
 // Post: La tabla de hash redimensiono su capacidad a "nuevo_tam", y se asignaron nuevos lugares para cada clave (teniendo en cuenta la nueva capacidad)
 bool hash_redimensionar(hash_t* hash, int nuevo) {    
-    if (nuevo > 0) hash->contador_primos++;
-    else hash->contador_primos--;
+    if (nuevo > 0) 
+        hash->contador_primos++;
+    else 
+        hash->contador_primos--;
+    
     hash_elem_t* tabla_post = calloc(primos[hash->contador_primos], sizeof(hash_elem_t));
     if (!tabla_post) return false;
     hash_elem_t* tabla_pre = hash->tabla;
@@ -174,9 +183,12 @@ bool hash_redimensionar(hash_t* hash, int nuevo) {
     hash->cantidad = 0;
 
     for (size_t i = 0; i < capacidad_pre; i++)
-        if (tabla_pre[i].estado == OCUPADO)
+        if (tabla_pre[i].estado == OCUPADO) {
             if (!hash_guardar(hash, tabla_pre[i].clave, tabla_pre[i].dato))
                 return false;
+            free(tabla_pre[i].clave);
+        }
+    free(tabla_pre);
     return true;
 }
 
@@ -205,7 +217,7 @@ size_t hash_buscar_clave(const hash_t* hash, const char* clave, size_t pos, bool
             espacio_libre = pos;
             espacio_listo = true;
         }
-        if (hash->tabla[pos].estado == OCUPADO && !strcmp(clave, hash->tabla[pos].clave)) {
+        else if (hash->tabla[pos].estado == OCUPADO && !strcmp(clave, hash->tabla[pos].clave)) {
             *existia = true;
             return pos;
         }
