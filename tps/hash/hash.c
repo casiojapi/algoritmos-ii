@@ -4,14 +4,15 @@
 #include <stdint.h>
 
 #include "hash.h"
-#define CAPACIDAD_INICIAL 33
+
+const unsigned long primos[14] = {47, 89, 167, 337, 673, 1319, 2677, 5107, 10211, 20431, 40867, 81611, 163169, 326503};
+// size_t contador_primos = 1;
 
 typedef enum estado {
     VACIO,
     OCUPADO,
     BORRADO
 } estado_t;
-
 
 typedef struct hash_elem {
     char* clave;
@@ -22,33 +23,14 @@ typedef struct hash_elem {
 
 struct hash {
     hash_elem_t* tabla;
-    size_t capacidad, cantidad, borrados;
+    size_t capacidad, cantidad, borrados, contador_primos;
     hash_destruir_dato_t destruir_dato;
 };  
 
 size_t hash_proximo(const hash_t* hash, size_t pos_actual);
-
-// En esta funcion se me ocurrieron bastantes cosas, principalmente, crear un nuevo hash. 
-// Pero iba a tener que usar hash guardar por lo que terminaria quedando una llamada recursiva a redimensionar, y preferi hacerlo a pedal.
-bool hash_redimensionar(hash_t* hash, size_t nuevo_tam) {    
-    hash_elem_t* tabla_post = calloc(nuevo_tam, sizeof(hash_elem_t));
-    if (!tabla_post) return false;
-    hash_elem_t* tabla_pre = hash->tabla;
-    size_t capacidad_pre = hash->capacidad;
-    hash->tabla = tabla_post;
-    hash->capacidad = nuevo_tam;
-    hash->cantidad = 0;
-    for (size_t i = 0; i < capacidad_pre; i++) {
-        if (tabla_pre[i].estado == OCUPADO) {
-            if (!hash_guardar(hash, tabla_pre[i].clave, tabla_pre[i].dato))
-                return false;
-        }
-    }
-    return true;
-}
-// Si ya existe una clave en el hash, devuelve su posicion, y un bool "existia" true por la interfaz.
-// De no existir previamente, devuelve la primer posicion disponible para agregar el elemento a la tabla, y el bool devuelto por la interfaz como false. 
+bool hash_redimensionar(hash_t* hash, int nuevo);
 size_t hash_buscar_clave(const hash_t* hash, const char* clave, size_t pos, bool* existia);
+
 // Voy a usar djb2
 // fuente: http://www.cse.yorku.ca/~oz/hash.html#djb2
 
@@ -60,29 +42,23 @@ unsigned long f_hash(const char *str) {
     return hash;
 }
 
-/* Crea el hash
- */
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato) {
     hash_t* h = calloc(1, sizeof(hash_t));
     if (!h) return NULL;
-    h->tabla = calloc(CAPACIDAD_INICIAL, sizeof(hash_elem_t));
+    h->contador_primos = 1;
+    h->tabla = calloc(primos[h->contador_primos], sizeof(hash_elem_t));
     if (!h->tabla) {
         free(h);
         return NULL;
     }
-    h->capacidad = CAPACIDAD_INICIAL;
+    h->capacidad = primos[h->contador_primos];
     h->destruir_dato = destruir_dato;
     return h;
 }
 
-/* Guarda un elemento en el hash, si la clave ya se encuentra en la
- * estructura, la reemplaza. De no poder guardarlo devuelve false.
- * Pre: La estructura hash fue inicializada
- * Post: Se almacenó el par (clave, dato)
- */
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     if ((hash->cantidad / hash->capacidad) >= 0.7)  // cuando el factor de carga es mayor a 0.7, redimensiono.
-        if (!hash_redimensionar(hash, hash->capacidad * 2))
+        if (!hash_redimensionar(hash, 1))
             return false;
     bool existia;
     size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &existia);
@@ -98,14 +74,7 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     }
     return true;
 }
-/* Borra un elemento del hash y devuelve el dato asociado.  Devuelve
 
- * Pre: La estructura hash fue inicializada
- * NULL si el dato no estaba.
-
- * Post: El elemento fue borrado de la estructura y se lo devolvió,
- * en el caso de que estuviera guardado.
- */
 void *hash_borrar(hash_t *hash, const char *clave) {
     bool pertenece;
     size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &pertenece);
@@ -118,10 +87,6 @@ void *hash_borrar(hash_t *hash, const char *clave) {
     return dato;
 }
 
-/* Obtiene el valor de un elemento del hash, si la clave no se encuentra
- * devuelve NULL.
- * Pre: La estructura hash fue inicializada
- */
 void *hash_obtener(const hash_t *hash, const char *clave) {
     bool pertenece;
     size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &pertenece);
@@ -129,27 +94,16 @@ void *hash_obtener(const hash_t *hash, const char *clave) {
     return hash->tabla[pos].dato;
 }
 
-/* Determina si clave pertenece o no al hash.
- * Pre: La estructura hash fue inicializada
- */
 bool hash_pertenece(const hash_t *hash, const char *clave) {
     bool pertenece;
     hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &pertenece);
     return pertenece;
 }
 
-/* Devuelve la cantidad de elementos del hash.
- * Pre: La estructura hash fue inicializada
- */
 size_t hash_cantidad(const hash_t *hash) {
     return hash->cantidad;
 }
 
-/* Destruye la estructura liberando la memoria pedida y llamando a la función
- * destruir para cada par (clave, dato).
- * Pre: La estructura hash fue inicializada
- * Post: La estructura hash fue destruida
- */
 void hash_destruir(hash_t *hash) {
     for (size_t i = 0; i < hash->capacidad;  i++) {
         if (hash->tabla[i].estado == OCUPADO) {
@@ -162,31 +116,13 @@ void hash_destruir(hash_t *hash) {
     free(hash);
 }
 
-size_t hash_buscar_clave(const hash_t* hash, const char* clave, size_t pos, bool* existia) {
-    size_t i = 0, espacio_libre = 0;
-    *existia = false;
-    while (i < hash->capacidad) {
-        if (!espacio_libre && (hash->tabla[pos].estado == VACIO || hash->tabla[pos].estado == BORRADO))
-            espacio_libre = pos;
-        if (hash->tabla[pos].estado == OCUPADO && !strcmp(clave, hash->tabla[pos].clave)) {
-            *existia = true;
-            return pos;
-        }
-        i++;
-        pos++;
-        if (pos == hash->capacidad)
-            pos = 0;
-    }
-    return espacio_libre;
-}
+// Primitivas - iterador del hash
 
-// iterador
 typedef struct hash_iter {
     hash_t* hash;
     size_t actual, recorridos;
 } hash_iter_t;
 
-// Crea iterador
 hash_iter_t *hash_iter_crear(const hash_t *hash) {
     hash_iter_t* iter = malloc(sizeof(hash_iter_t));
     if (!iter) return NULL;
@@ -196,7 +132,6 @@ hash_iter_t *hash_iter_crear(const hash_t *hash) {
     return iter;
 }
 
-// Avanza iterador
 bool hash_iter_avanzar(hash_iter_t *iter) {
     if (hash_iter_al_final(iter)) return false;
     size_t prox = hash_proximo(iter->hash, iter->actual);
@@ -207,29 +142,77 @@ bool hash_iter_avanzar(hash_iter_t *iter) {
     return true;
 }
 
-// Devuelve clave actual, esa clave no se puede modificar ni liberar.
 const char *hash_iter_ver_actual(const hash_iter_t *iter) {
     if (hash_iter_al_final(iter)) return NULL;
-    char* s = malloc(sizeof(char) * strlen(iter->hash->tabla[iter->actual].clave) + 1) ;
-    strcpy(s, iter->hash->tabla[iter->actual].clave);
-    return s;
+    return strdup(iter->hash->tabla[iter->actual].clave);
 }
 
-// Comprueba si terminó la iteración
 bool hash_iter_al_final(const hash_iter_t *iter) {
-    return iter->recorridos == iter->hash->cantidad;
+    size_t pos = hash_proximo(iter->hash, iter->actual);
+    return pos == iter->actual;
 }
 
-// Destruye iterador
 void hash_iter_destruir(hash_iter_t *iter) {
     free(iter);
 }
 
+// Redimensiona la tabla de hash, cambiando su capacidad a "nuevo_tam".
+// Devuelve false en caso de haber algun error con la memoria.
+// Devuelve true si sale todo bien. 
+// Pre: Recibe un hash inicializado.
+// Post: La tabla de hash redimensiono su capacidad a "nuevo_tam", y se asignaron nuevos lugares para cada clave (teniendo en cuenta la nueva capacidad)
+bool hash_redimensionar(hash_t* hash, int nuevo) {    
+    if (nuevo > 0) hash->contador_primos++;
+    else hash->contador_primos--;
+    hash_elem_t* tabla_post = calloc(primos[hash->contador_primos], sizeof(hash_elem_t));
+    if (!tabla_post) return false;
+    hash_elem_t* tabla_pre = hash->tabla;
+    size_t capacidad_pre = hash->capacidad;
+
+    hash->tabla = tabla_post;
+    hash->capacidad = primos[hash->contador_primos];
+    hash->cantidad = 0;
+
+    for (size_t i = 0; i < capacidad_pre; i++)
+        if (tabla_pre[i].estado == OCUPADO)
+            if (!hash_guardar(hash, tabla_pre[i].clave, tabla_pre[i].dato))
+                return false;
+    return true;
+}
+
+
+// Recibe un hash y la posicion actual en la que se encuentra.
+// Devuelve la posicion del proximo elemento en la tabla. 
+// En caso de llegar al final de la tabla y no encontrar un nuevo elemento, devuelve la misma posicion actual. 
+// Pre: Recibe un hash inicializado, y una posicion actual valida. 
+// Post: Devuelve la posicion en la que se encuentra el proximo elemento de la tabla.
+// En caso de no encontrar un proximo elemento, devuelve la misma posicion. 
 size_t hash_proximo(const hash_t* hash, size_t pos_actual) {
-    size_t i;
-    for (i = pos_actual + 1; i < hash->capacidad; i++) {
+    for (size_t i = pos_actual + 1; i < hash->capacidad; i++)
         if (hash->tabla[i].estado == OCUPADO)
             return i;
-    }
     return pos_actual;
+}
+
+// Si ya existe una clave en el hash, devuelve su posicion, y un bool "existia" true por la interfaz.
+// De no existir previamente, devuelve la primer posicion disponible para agregar el elemento a la tabla, y el bool devuelto por la interfaz como false. 
+size_t hash_buscar_clave(const hash_t* hash, const char* clave, size_t pos, bool* existia) {
+    size_t i = 0, espacio_libre = 0;
+    *existia = false;
+    bool espacio_listo = false;
+    while (i < hash->capacidad) {
+        if (!espacio_listo && (hash->tabla[pos].estado == VACIO || hash->tabla[pos].estado == BORRADO)) {
+            espacio_libre = pos;
+            espacio_listo = true;
+        }
+        if (hash->tabla[pos].estado == OCUPADO && !strcmp(clave, hash->tabla[pos].clave)) {
+            *existia = true;
+            return pos;
+        }
+        i++;
+        pos++;
+        if (pos == hash->capacidad)
+            pos = 0;
+    }
+    return espacio_libre;
 }
