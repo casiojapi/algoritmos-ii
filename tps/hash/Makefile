@@ -1,5 +1,5 @@
 all:
-	gcc -g -Wall -Wconversion -Wno-sign-conversion -Werror -o pruebas *.c
+	gcc -g -Wall -Wconversion -Wno-sign-conversion -o pruebas *.c
 mem:
 	valgrind --leak-check=full --track-origins=yes --show-reachable=yes ./pruebas
 clean:

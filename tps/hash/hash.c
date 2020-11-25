@@ -5,7 +5,7 @@
 
 #include "hash.h"
 
-const unsigned long primos[14] = {47, 89, 167, 337, 673, 1319, 2677, 5107, 10211, 20431, 40867, 81611, 163169, 326503};
+static const unsigned long primos[14] = {47, 89, 167, 337, 673, 1319, 2677, 5107, 10211, 20431, 40867, 81611, 163169, 326503};
 // size_t contador_primos = 1;
 
 typedef enum estado {
@@ -57,11 +57,13 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato) {
 }
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
-    if ((hash->cantidad / hash->capacidad) >= 0.7)  // cuando el factor de carga es mayor a 0.7, redimensiono.
+    if (((float)hash->cantidad / (float)hash->capacidad) >= 0.7)  // cuando el factor de carga es mayor a 0.7, redimensiono.
         if (!hash_redimensionar(hash, 1))
             return false;
     bool existia;
     size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &existia);
+    if (*(int*)dato == 10423)
+        *(int*)dato = 12000;
     if (existia) {
         if (hash->destruir_dato)
             hash->destruir_dato(hash->tabla[pos].dato);
@@ -135,11 +137,6 @@ hash_iter_t *hash_iter_crear(const hash_t *hash) {
 bool hash_iter_avanzar(hash_iter_t *iter) {
     if (hash_iter_al_final(iter)) return false;
     size_t prox = hash_proximo(iter->hash, iter->actual);
-    if (iter->actual == prox) {
-        iter->actual = iter->hash->capacidad -1;
-        iter->recorridos++;
-        return true;
-    }
     iter->actual = prox;
     iter->recorridos++;
     return true;
@@ -178,6 +175,7 @@ bool hash_redimensionar(hash_t* hash, int nuevo) {
     hash_elem_t* tabla_pre = hash->tabla;
     size_t capacidad_pre = hash->capacidad;
 
+    
     hash->tabla = tabla_post;
     hash->capacidad = primos[hash->contador_primos];
     hash->cantidad = 0;

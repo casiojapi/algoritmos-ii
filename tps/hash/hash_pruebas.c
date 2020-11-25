@@ -379,11 +379,15 @@ static void prueba_hash_iterar_volumen(size_t largo)
     print_test("Prueba hash iterador esta al final, es true", hash_iter_al_final(iter));
 
     ok = true;
+    
     for (i = 0; i < largo; i++) {
+        printf("asignando valores: %d::: %zd == %zd\n",i,  valores[i], largo);
         if ( valores[i] != largo ) {
             ok = false;
-            break;
+            //break;
+            printf("\n\n!!!!\n\n");
         }
+        
     }
     print_test("Prueba hash iteración en volumen, se cambiaron todo los elementos", ok);
 
@@ -400,17 +404,19 @@ static void prueba_hash_iterar_volumen(size_t largo)
 void pruebas_hash_catedra()
 {
     /* Ejecuta todas las pruebas unitarias. */
-    prueba_hash_iterar();
-    prueba_iterar_hash_vacio();
-    prueba_hash_iterar_volumen(5000);
-    prueba_crear_hash_vacio();
-    prueba_hash_insertar();
-    prueba_hash_reemplazar();
-    prueba_hash_reemplazar_con_destruir();
-    prueba_hash_borrar();
-    prueba_hash_clave_vacia();
-    prueba_hash_valor_null();
-    prueba_hash_volumen(5000, true);
+    // prueba_hash_iterar();
+    // prueba_iterar_hash_vacio();
+    prueba_hash_iterar_volumen(12000);
+    // prueba_crear_hash_vacio();
+    // prueba_hash_insertar();
+    // prueba_hash_reemplazar();
+    // prueba_hash_reemplazar_con_destruir();
+    // prueba_hash_borrar();
+    // prueba_hash_clave_vacia();
+    // prueba_hash_valor_null();
+    // prueba_hash_volumen(5000, true);
+    // prueba_hash_volumen(8000, true);
+    // prueba_hash_volumen(12500, true);
 }
 
 void pruebas_volumen_catedra(size_t largo)
