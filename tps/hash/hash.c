@@ -5,7 +5,7 @@
 
 #include "hash.h"
 
-static const unsigned long primos[14] = {47, 89, 167, 337, 673, 1319, 2677, 5107, 10211, 20431, 40867, 81611, 163169, 326503};
+static const unsigned long primos[17] = {47, 89, 167, 337, 673, 1319, 2677, 5107, 10211, 20431, 40867, 81611, 163169, 326503, 650000, 1300000, 2500000};
 // size_t contador_primos = 1;
 
 typedef enum estado {
@@ -42,10 +42,21 @@ unsigned long f_hash(const char *str) {
     return hash;
 }
 
+
+// unsigned long f_hash(const char* str) {
+//     unsigned long hash;
+//    // size_t i, len;
+
+
+//     for (hash = 0; *str != '\0'; str++)
+//         hash = *str + 31*hash;
+//     return hash;
+// }
+
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato) {
     hash_t* h = calloc(1, sizeof(hash_t));
     if (!h) return NULL;
-    h->contador_primos = 1;
+    h->contador_primos = 0;
     h->tabla = calloc(primos[h->contador_primos], sizeof(hash_elem_t));
     if (!h->tabla) {
         free(h);
@@ -211,12 +222,22 @@ size_t hash_buscar_clave(const hash_t* hash, const char* clave, size_t pos, bool
     *existia = false;
     bool espacio_listo = false;
     while (i < hash->capacidad) {
-        if (!espacio_listo && (hash->tabla[pos].estado == VACIO || hash->tabla[pos].estado == BORRADO)) {
+        // if (!espacio_listo && (hash->tabla[pos].estado == VACIO || hash->tabla[pos].estado == BORRADO)) {
+        //     espacio_libre = pos;
+        //     espacio_listo = true;
+        // }
+        if (!espacio_listo && hash->tabla[pos].estado == BORRADO) {
             espacio_libre = pos;
             espacio_listo = true;
         }
         else if (hash->tabla[pos].estado == OCUPADO && !strcmp(clave, hash->tabla[pos].clave)) {
             *existia = true;
+            return pos;
+        }
+        else if (hash->tabla[pos].estado == VACIO) {
+            if (espacio_listo) {
+                return espacio_libre;
+            }
             return pos;
         }
         i++;

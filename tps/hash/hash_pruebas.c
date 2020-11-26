@@ -382,8 +382,10 @@ static void prueba_hash_iterar_volumen(size_t largo)
     for (i = 0; i < largo; i++) {
         if ( valores[i] != largo ) {
             ok = false;
-            break;
+            // break;
         }
+        // printf("%d) %zd == %zd\t%s\n", i, valores[i], largo, ok ? "" : "###################");
+        // ok = true;
     }
     print_test("Prueba hash iteración en volumen, se cambiaron todo los elementos", ok);
 
