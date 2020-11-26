@@ -62,8 +62,8 @@ bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
             return false;
     bool existia;
     size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &existia);
-    if (*(int*)dato == 10423)
-        *(int*)dato = 12000;
+    // if (*(int*)dato == 10423)
+    //     *(int*)dato = 12500;
     if (existia) {
         if (hash->destruir_dato)
             hash->destruir_dato(hash->tabla[pos].dato);
