@@ -177,5 +177,7 @@ void print_output(cola_t* output) {
 }
 
 size_t tok_prec(struct calc_token* t) {
-    return t->oper.precedencia;
+    if (t->type == TOK_OPER) 
+        return t->oper.precedencia;
+    return 0;
 }

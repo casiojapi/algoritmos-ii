@@ -83,14 +83,12 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
         }
         else if (op == '(') {
             parsed->type = TOK_LPAREN;
-            parsed->oper.precedencia = 0;
             parsed->oper.asociatividad = ASSOC_PAREN;
             return true;
         }
         else if (op == ')') {
             parsed->type = TOK_RPAREN;
-            parsed->oper.precedencia = 0;
-            parsed->oper.asociatividad = ASSOC_LEFT;
+            parsed->oper.asociatividad = ASSOC_PAREN;
             return true;
         }
         return false;
