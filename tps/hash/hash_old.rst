@@ -4,8 +4,9 @@
 #include <stdint.h>
 
 #include "hash.h"
-#define CANT_PRIMOS 14
-static const unsigned long primos[CANT_PRIMOS] = {47, 89, 167, 337, 673, 1319, 2677, 5107, 10211, 20431, 40867, 81611, 163169, 326503};
+
+static const unsigned long primos[17] = {47, 89, 167, 337, 673, 1319, 2677, 5107, 10211, 20431, 40867, 81611, 163169, 326503, 650000, 1300000, 2500000};
+// size_t contador_primos = 1;
 
 typedef enum estado {
     VACIO,
@@ -19,14 +20,15 @@ typedef struct hash_elem {
     estado_t estado;
 } hash_elem_t;
 
+
 struct hash {
     hash_elem_t* tabla;
-    size_t capacidad, cantidad, contador_primos;
+    size_t capacidad, cantidad, borrados, contador_primos;
     hash_destruir_dato_t destruir_dato;
-};
+};  
 
 size_t hash_proximo(const hash_t* hash, size_t pos_actual);
-bool hash_redimensionar(hash_t* hash);
+bool hash_redimensionar(hash_t* hash, int nuevo);
 size_t hash_buscar_clave(const hash_t* hash, const char* clave, size_t pos, bool* existia);
 
 // Voy a usar djb2
@@ -39,6 +41,17 @@ unsigned long f_hash(const char *str) {
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
     return hash;
 }
+
+
+// unsigned long f_hash(const char* str) {
+//     unsigned long hash;
+//    // size_t i, len;
+
+
+//     for (hash = 0; *str != '\0'; str++)
+//         hash = *str + 31*hash;
+//     return hash;
+// }
 
 hash_t *hash_crear(hash_destruir_dato_t destruir_dato) {
     hash_t* h = calloc(1, sizeof(hash_t));
@@ -56,10 +69,12 @@ hash_t *hash_crear(hash_destruir_dato_t destruir_dato) {
 
 bool hash_guardar(hash_t *hash, const char *clave, void *dato) {
     if (((float)hash->cantidad / (float)hash->capacidad) >= 0.7)  // cuando el factor de carga es mayor a 0.7, redimensiono.
-        if (!hash_redimensionar(hash))
+        if (!hash_redimensionar(hash, 1))
             return false;
     bool existia;
     size_t pos = hash_buscar_clave(hash, clave, f_hash(clave) % hash->capacidad, &existia);
+    // if (*(int*)dato == 10423)
+    //     *(int*)dato = 12500;
     if (existia) {
         if (hash->destruir_dato)
             hash->destruir_dato(hash->tabla[pos].dato);
@@ -125,12 +140,7 @@ hash_iter_t *hash_iter_crear(const hash_t *hash) {
     hash_iter_t* iter = malloc(sizeof(hash_iter_t));
     if (!iter) return NULL;
     iter->hash = (hash_t*)hash;
-    if(hash->tabla[0].estado == OCUPADO){
-        iter->actual = 0;
-    }
-    else{
-        iter->actual = hash_proximo(hash, 0);
-    }
+    iter->actual = hash_proximo(hash, 0);
     iter->recorridos = 0;
     return iter;
 }
@@ -149,7 +159,11 @@ const char *hash_iter_ver_actual(const hash_iter_t *iter) {
 }
 
 bool hash_iter_al_final(const hash_iter_t *iter) {
+    // size_t pos = hash_proximo(iter->hash, iter->actual);
+    // return pos == iter->actual;
     return iter->hash->cantidad == iter->recorridos;
+    // return iter->actual == iter->hash->capacidad -1;
+    // return (iter->hash->tabla + iter->actual) == NULL;
 }
 
 void hash_iter_destruir(hash_iter_t *iter) {
@@ -158,25 +172,23 @@ void hash_iter_destruir(hash_iter_t *iter) {
 
 // Redimensiona la tabla de hash, cambiando su capacidad a "nuevo_tam".
 // Devuelve false en caso de haber algun error con la memoria.
-// Devuelve true si sale todo bien.
+// Devuelve true si sale todo bien. 
 // Pre: Recibe un hash inicializado.
 // Post: La tabla de hash redimensiono su capacidad a "nuevo_tam", y se asignaron nuevos lugares para cada clave (teniendo en cuenta la nueva capacidad)
-bool hash_redimensionar(hash_t* hash) {
-    hash->contador_primos++;
-    size_t capacidad_post;
-    if(hash->contador_primos >= CANT_PRIMOS){
-        capacidad_post = (hash->capacidad) * 2;
-    }
-    else{
-        capacidad_post = primos[hash->contador_primos];
-    }
-    hash_elem_t* tabla_post = calloc(capacidad_post, sizeof(hash_elem_t));
+bool hash_redimensionar(hash_t* hash, int nuevo) {    
+    if (nuevo > 0) 
+        hash->contador_primos++;
+    else 
+        hash->contador_primos--;
+    
+    hash_elem_t* tabla_post = calloc(primos[hash->contador_primos], sizeof(hash_elem_t));
     if (!tabla_post) return false;
     hash_elem_t* tabla_pre = hash->tabla;
     size_t capacidad_pre = hash->capacidad;
 
+    
     hash->tabla = tabla_post;
-    hash->capacidad = capacidad_post;
+    hash->capacidad = primos[hash->contador_primos];
     hash->cantidad = 0;
 
     for (size_t i = 0; i < capacidad_pre; i++)
@@ -191,11 +203,11 @@ bool hash_redimensionar(hash_t* hash) {
 
 
 // Recibe un hash y la posicion actual en la que se encuentra.
-// Devuelve la posicion del proximo elemento en la tabla.
-// En caso de llegar al final de la tabla y no encontrar un nuevo elemento, devuelve la misma posicion actual.
-// Pre: Recibe un hash inicializado, y una posicion actual valida.
+// Devuelve la posicion del proximo elemento en la tabla. 
+// En caso de llegar al final de la tabla y no encontrar un nuevo elemento, devuelve la misma posicion actual. 
+// Pre: Recibe un hash inicializado, y una posicion actual valida. 
 // Post: Devuelve la posicion en la que se encuentra el proximo elemento de la tabla.
-// En caso de no encontrar un proximo elemento, devuelve la misma posicion.
+// En caso de no encontrar un proximo elemento, devuelve la misma posicion. 
 size_t hash_proximo(const hash_t* hash, size_t pos_actual) {
     for (size_t i = pos_actual + 1; i < hash->capacidad; i++)
         if (hash->tabla[i].estado == OCUPADO)
@@ -204,12 +216,16 @@ size_t hash_proximo(const hash_t* hash, size_t pos_actual) {
 }
 
 // Si ya existe una clave en el hash, devuelve su posicion, y un bool "existia" true por la interfaz.
-// De no existir previamente, devuelve la primer posicion disponible para agregar el elemento a la tabla, y el bool devuelto por la interfaz como false.
+// De no existir previamente, devuelve la primer posicion disponible para agregar el elemento a la tabla, y el bool devuelto por la interfaz como false. 
 size_t hash_buscar_clave(const hash_t* hash, const char* clave, size_t pos, bool* existia) {
     size_t i = 0, espacio_libre = 0;
     *existia = false;
     bool espacio_listo = false;
     while (i < hash->capacidad) {
+        // if (!espacio_listo && (hash->tabla[pos].estado == VACIO || hash->tabla[pos].estado == BORRADO)) {
+        //     espacio_libre = pos;
+        //     espacio_listo = true;
+        // }
         if (!espacio_listo && hash->tabla[pos].estado == BORRADO) {
             espacio_libre = pos;
             espacio_listo = true;
