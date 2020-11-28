@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stfbool.h>
+
 // Arbol binario normal. 
 
 // Raiz: el padre del arbol. el hijo izq de la raiz, es la raiz del sub-arbol izquierdo. 
@@ -71,3 +75,15 @@ struct abb {
 
 typedef int (*abb_comparar_clave_t)(const char*, const char*);
 // y entra en el abb
+
+size_t contador_de_hojas(ab_t* ab) {    // O(n)
+    if (!ab) return 0;
+    if (!ab->izq && !ab->der) return 1;
+    return contador_de_hojas(ab->izq) + contador_de_hojas(ab->der);
+}
+
+bool arboles_iguales(ab_t* ab_1, ab_t* ab_2) {
+    if (!ab_1 || !ab_2)
+        return !ab_1 && !ab_2;
+    return arboles_iguales(ab_1->izq, ab_2->izq) && arboles_iguales(ab_1->der, ab_2->der);
+}
