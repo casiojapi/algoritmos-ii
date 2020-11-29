@@ -87,3 +87,22 @@ bool arboles_iguales(ab_t* ab_1, ab_t* ab_2) {
         return !ab_1 && !ab_2;
     return arboles_iguales(ab_1->izq, ab_2->izq) && arboles_iguales(ab_1->der, ab_2->der);
 }
+
+// implementar una primitiava para el ABB, que devuelva una lista con las claves del mismo, ordenadas tal que si insertaramos las claves en un ABB
+// vacio, dicho ABB tendira la misma estructura que el arbol original.
+
+void _abb_obtener_claves(abb_nodo_t* actual, lista_t* lista) {   // implemento la agregacion a la lista en "in-order" para que despues cuando 
+    if (actual == NULL) return;
+    lista_insertar_ultimo(lista, (void*)actual->clave);
+    _abb_obtener_claves(actual->izq, lista);
+    _abb_obtener_claves(actual->der, lista);
+    return;
+}
+
+// y el wrapper
+
+lista_t* lista_ordenada(abb_t* abb) {
+    lista_t* l = lista_crear();
+    _abb_obtener_claves(abb->raiz, l);  // O(n)
+    return l;
+}
