@@ -1,3 +1,35 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+// arbol recursivo (sin nodos especeficamente nodos)
+typedef struct ab {
+    struct ab* izq;
+    struct ab* der;
+    char* clave;
+    void* dato;
+} ab_t;
+
+// arbol con raiz 
+struct ab {
+    nodo_t* raiz;
+} ab_t;
+
+typedef struct nodo {
+    struct nodo* izq;
+    struct nodo* der;
+    char* clave;
+    void* dato;
+} nodo_t;
+
+size_t altura(nodo_t* nodo) {
+    if (!nodo) return 0;
+    return max(altura(nodo->der), altura(nodo->izq)) + 1;
+}
+
+
+
+
+
 size_t contador_de_hojas(ab_t* ab) {    // O(n)
     if (!ab) return 0;
     if (!ab->izq && !ab->der) return 1;
@@ -86,4 +118,46 @@ lsita_t* hash_aberto_claves(const hash_t* hash) {
         lista_iter_destruir(iter);
     }
     return claves;
+}
+
+
+// invertir arbol - invierte el arbol, hijos izq de cada nodo pasa a ser derecho. 
+
+typedef struct arbol_inv {
+    struct arbol_inv* izq;
+    struct arbol_inv* der;
+} arbol_t;
+
+void arbol_invertir(arbol_t* ab) {
+    if (!ab) return;
+    arbol_t* der_antes = ab->der;
+    ab->der = ab->izq;
+    ab->izq = der_antes;
+    arbol_invertir(ab->der);
+    arbol_invertir(ab->izq);
+    return;
+}
+
+// Nodos mayores a una clave
+
+lista_t* abb_mayores(const abb_t* abb, const char* clave) {
+    lista_t* mayores = lista_crear();
+    if (!mayores) {
+        return NULL;
+    }
+    _abb_mayores(abb, clave, mayores);
+    return mayores;
+}
+
+void _abb_mayores(const abb_t* abb, const char* clave, lista_t* claves) {
+    // caso base SIEMPRE
+    if (abb == NULL) {
+        return;
+    }
+    // si la actual es mayor, llamamos a la izquierda y guardamos la actual
+    if (strcmp(abb->clave, clave) > 0) {
+        _abb_mayores(abb->izq, clave, claves);
+        lista_insertar_primero(claves, abb->clave);
+    }
+    _abb_mayores(abb->der, clave, claves);
 }
