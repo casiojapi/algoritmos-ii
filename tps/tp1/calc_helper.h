@@ -106,6 +106,7 @@ typedef struct calc_oper {  // Para tokens TOK_OPER
     size_t operandos;
     unsigned precedencia;
     enum assoc asociatividad;  // p.ej. ASSOC_LEFT, ASSOC_RIGHT (a definir
+    char* texto;
 } calc_operador;
 
 
@@ -150,7 +151,7 @@ struct calc_token {
  * tener la verificación y la conversión juntas, para que nunca diverjan.)
  */
 
-bool calc_parse(const char *tok_str, struct calc_token *parsed_token);
+bool calc_parse(const char *tok_str, struct calc_token *parsed_token, bool str);
 
 
 /*
@@ -186,5 +187,6 @@ void apilar_num(pilanum_t *pila, calc_num num);
 bool desapilar_num(pilanum_t *pila, calc_num *num);
 
 struct calc_token* token_copiar(struct calc_token* a_copiar);
+void destruir_token(struct calc_token* t);
 
 #endif

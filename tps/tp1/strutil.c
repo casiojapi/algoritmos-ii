@@ -7,18 +7,16 @@
 
 #define MAX_IND 100000
 
+size_t obtener_memoria_y_strs(size_t* lens, char** strv, size_t* strs);
+
 char *substr(const char *str, size_t n) {
-    char* c = calloc(n + 1, sizeof(char));
-    if (!c) return NULL;
-    strncpy(c, str, n);
-    //c[n] = '\0';
-    return c;
+    char* c = strndup(str, n);
+    return c ? c : NULL;
 }
 
 char **split(const char *str, char sep) {
     if (!str)
         return NULL;
-
     size_t n = strlen(str);
     size_t cadenas = 0;
     char** cc = NULL;
@@ -49,16 +47,20 @@ char *join(char **strv, char sep) {
     if (sep == '\0')
         no_null = 0;
 
-    size_t lens[MAX_IND];
-    for (size_t i = 0; strv[i]; i++) {
-        lens[strs] = strlen(strv[i]) + 1;
-        mem += lens[strs++];
-    }
-    if (!mem)
-        return strdup("");
+    size_t* lens = calloc(MAX_IND, sizeof(size_t));
+    if (!lens) return NULL;
 
+    mem = obtener_memoria_y_strs(lens, strv, &strs);
+    if (!mem) {
+        free(lens);
+        return strdup("");
+    }
+    
     char* c = calloc(mem, sizeof(char));
-    if (!c) return NULL;
+    if (!c) {
+        free(lens);
+        return NULL;
+    }
     size_t index = 0;
     for (size_t i = 0; i < strs; i++) {
         strncpy(c + index, strv[i], lens[i]);
@@ -67,6 +69,7 @@ char *join(char **strv, char sep) {
             strncpy(c + index++, &sep, 1);
     }
     c[index - no_null] = '\0';
+    free(lens);
     return c;
 }
 
@@ -75,3 +78,23 @@ void free_strv(char *strv[]) {
         free(strv[i]);
     free(strv);
 }
+
+size_t obtener_memoria_y_strs(size_t* lens, char** strv, size_t* strs) {
+    size_t mem = 0;
+    for (size_t i = 0; strv[i]; i++) {
+        lens[*strs] = strlen(strv[i]) + 1;
+        mem += lens[(*strs)++];
+    }
+    return mem;
+}
+/*
+int main(void) {
+    char** strv = split("aaa, sss, aaa, sd, ,s, s,a,aaaa,a,,a,a,aaaa,a", ',');
+    for (size_t i = 0; i < 14; i++)
+        printf("%s\n", strv[i]);
+    char* joineado = join(strv, '+');
+        printf("%s\n", joineado);
+    free_strv(strv);
+    free(joineado);
+    return 0;
+}*/

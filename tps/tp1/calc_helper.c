@@ -29,7 +29,7 @@ static bool parse_num(const char *tok, calc_num *dest);
 // Returns:
 //    verdadero si la palabra formaba un token válido, falso en caso contrario
 //
-bool calc_parse(const char *tok, struct calc_token *parsed) {
+bool calc_parse(const char *tok, struct calc_token *parsed, bool str) {
     if (parse_num(tok, &parsed->value)) {
         parsed->type = TOK_NUM;
         return true;
@@ -45,6 +45,10 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
             parsed->oper.operandos = 2;
             parsed->oper.precedencia = 2;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            if (str)
+                parsed->oper.texto = strdup("+ ");
+            else 
+                parsed->oper.texto = NULL;
             return true;
         }
         else if (op == '-') {
@@ -52,6 +56,10 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
             parsed->oper.operandos = 2;
             parsed->oper.precedencia = 2;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            if (str)
+                parsed->oper.texto = strdup("- ");
+            else 
+                parsed->oper.texto = NULL;
             return true;
         }
         else if (op == '*') {
@@ -59,6 +67,10 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
             parsed->oper.operandos = 2;
             parsed->oper.precedencia = 3;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            if (str)
+                parsed->oper.texto = strdup("* ");
+            else 
+                parsed->oper.texto = NULL;
             return true;
             
         }
@@ -67,6 +79,10 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
             parsed->oper.operandos = 2;
             parsed->oper.precedencia = 3;
             parsed->oper.asociatividad = ASSOC_LEFT;
+            if (str)
+                parsed->oper.texto = strdup("/ ");
+            else 
+                parsed->oper.texto = NULL;
             return true;
         }
         else if (op == '^') {
@@ -74,21 +90,28 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
             parsed->oper.operandos = 2;
             parsed->oper.precedencia = 4;
             parsed->oper.asociatividad = ASSOC_RIGHT;
+            if (str)
+                parsed->oper.texto = strdup("^ ");
+            else 
+                parsed->oper.texto = NULL;
             return true;
         }
         else if (op == '?') {
             parsed->oper.op = OP_TERN;
             parsed->oper.operandos = 3;
+            parsed->oper.texto = NULL;
             return true;
         }
         else if (op == '(') {
             parsed->type = TOK_LPAREN;
             parsed->oper.asociatividad = ASSOC_PAREN;
+            parsed->oper.texto = NULL;
             return true;
         }
         else if (op == ')') {
             parsed->type = TOK_RPAREN;
             parsed->oper.asociatividad = ASSOC_PAREN;
+            parsed->oper.texto = NULL;
             return true;
         }
         return false;
@@ -97,12 +120,14 @@ bool calc_parse(const char *tok, struct calc_token *parsed) {
         parsed->oper.op = OP_LOG;
         parsed->oper.operandos = 2;
         parsed->oper.asociatividad = ASSOC_LEFT;
+        parsed->oper.texto = NULL;
         return true;
     }
     else if (strcmp(tok, "sqrt") == 0) {
         parsed->oper.op = OP_RAIZ;
         parsed->oper.operandos = 1;
         parsed->oper.asociatividad = ASSOC_LEFT;
+        parsed->oper.texto = NULL;
         return true;
     }
     return false;
@@ -262,5 +287,15 @@ struct calc_token* token_copiar(struct calc_token* a_copiar) {
     t->oper.operandos = a_copiar->oper.operandos;
     t->oper.op = a_copiar->oper.op;
     t->oper.asociatividad = a_copiar->oper.operandos;
+    if (a_copiar->oper.texto)
+        t->oper.texto = a_copiar->oper.texto;
+    else 
+        t->oper.texto = NULL;
     return t;
+}
+
+void destruir_token(struct calc_token* t) {
+    if (t->type == TOK_OPER && t->oper.texto)
+        free(t->oper.texto);
+    free(t);
 }

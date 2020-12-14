@@ -10,3 +10,23 @@
 2 * (3 + 4) / 5
 3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3
 
+// bool creacion_de_estructuras(char* linea, char** strv, struct calc_token *t, cola_t* output, pila_t* operadores) {
+//     strv = infix_split(linea);
+//     if (!strv) return false;
+//     t = calloc(1, sizeof(struct calc_token));
+//     if (!t) {
+//         free_strv(strv);
+//         return false;
+//     }
+//     output = cola_crear();
+//     if (!output) {
+//         destruir_conversor(t, NULL, NULL, strv, NULL, NULL);
+//         return false;
+//     }
+//     operadores = pila_crear();
+//     if (!operadores) {
+//                 destruir_conversor(t, output, NULL, strv, NULL, NULL);
+//                 return false;
+//     }
+//     return true;
+// }
