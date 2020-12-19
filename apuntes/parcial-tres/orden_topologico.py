@@ -1,4 +1,4 @@
-def orden_topologico_bfs(grafo): 
+def orden_topologico_bfs(grafo): 	# condiciones normales O(v + E)
 	grados = {}
 	for v in grafo:
 		grados[v] = 0
@@ -25,7 +25,7 @@ def orden_topologico_bfs(grafo):
 
 #dfs
 
-def orden_topologico(grafo):
+def orden_topologico(grafo):	# O(v + e)
 	visitados = set()
 	pila = pila_crear()
 	for v in grafo:
