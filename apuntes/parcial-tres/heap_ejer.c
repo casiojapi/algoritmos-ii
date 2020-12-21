@@ -28,7 +28,7 @@ int* k_merge(int** arr, size_t k, size_t h) {
         heap_encolar(minimos, _crear_min(0, i, arr[i][0])); // o(log k)
     }
     for (size_t i = 0; !heap_esta_vacio(minimos); i++) {  // o ((h*k) * (2 * (log k)))
-        minimo_t* min = heap_desencolar(minimos); // o(log n)
+        minimo_t* min = heap_desencolar(minimos); // o(log k)
         res[i] = min->valor;
         if (min->valor_pos + 1 >= h) {
             free(min);
