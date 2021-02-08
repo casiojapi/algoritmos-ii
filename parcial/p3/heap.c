@@ -195,3 +195,27 @@ void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp){
     }
 }
 
+
+
+heap_t* heap_interseccion(const heap_t* h1, const heap_t* h2, cmp_func_t nueva_cmp) {
+    heap_t* heap_final = heap_crear(nueva_cmp);
+    if (heap_final == NULL) return NULL;
+    // uno los dos arreglos en uno solo, y llamo a heapify a que los ordene 
+    size_t cantidad_total_elem = h1->cantidad + h2->cantidad;
+    void** arr = malloc(sizeof(void*) * cantidad_total_elem);
+    if (arr == NULL) {
+        heap_destruir(heap_final, NULL);
+        return NULL;
+    }
+    // de esta parte no estaba muy seguro ya que nunca habia unido dos arrays en c, pero creo que con esto deberia andar bien. 
+    memcpy(arr, h1->arreglo, h1->cantidad);
+    memcpy(arr + h1->cantidad, h2->arreglo, h2->cantidad);
+    // heapify de los dos arreglos juntos. 
+    heapify(arr, cantidad_total_elem, nueva_cmp);
+    // arreglo la invariante del heap
+    heap_final->cantidad = cantidad_total_elem;
+    heap_final->arreglo = arr;
+    heap_final->cmp = nueva_cmp;
+    heap_final->cantidad = cantidad_total_elem;
+    return heap_final;
+}

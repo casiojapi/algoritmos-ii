@@ -15,7 +15,7 @@ def puntos_articulacion(grafo, v, visitados, es_raiz, orden, mas_bajo, p_art): #
     if es_raiz and hijos > 1:
         p_art.add(v)
     
-def tarjan(grafo, v, visitados, pila, apilados, orden, mas_bajo, cfcs, *indice):
+def tarjan(grafo, v, visitados, pila, apilados, orden, mas_bajo, cfcs, *indice):    #o(v+e)
     visitados.add(v)
     pila.apilar(v)
     apilados.add(v)

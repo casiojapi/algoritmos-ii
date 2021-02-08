@@ -95,7 +95,6 @@ def instagram_recomendados(grafo, origen):  #recomienda los que sigue mis seguid
 
 #ejercicio de orden topologico
 def grafo_desde_palabras(palabras):
-
     grafo = Grafo(es_dirigido=True)
     for i in range(len(palabras) - 1):
         p1 = palabras[i] 
@@ -105,13 +104,14 @@ def grafo_desde_palabras(palabras):
             grafo.agregar_vertices(letra)
 
         for j in range(len(p1)):
-            grafo.agregar_vertices(p2[j])
-            grafo.agregar_arista(pi[j], p2[j], 1)
-            break
+            if p1[j] != p2[j]:
+                grafo.agregar_vertices(p2[j])
+                grafo.agregar_arista(p1[j], p2[j], 1)
+                break
     return grafo
 
 def idioma_alien(palabras):
-    grafo = grafo_desde_palabras(palabras)  # O(n) siendo n la sumatoria de letras en cada palabra
+    grafo = grafo_desde_palabras(palabras)  # O(n) siendo n la sumatoria de letras en cada palabra 
     grados = {}
 
     for v in grafo:
@@ -138,11 +138,3 @@ def idioma_alien(palabras):
 
 # O (n + (v + e))
 
-# ejercicio de k merge
-# escribir en C una funcion k_merge que reciba k arreglos ordenados y devuelva uno nuevo con todos los elementos ordenados entre si. 
-
-typedef struct minimo {
-    size_t valor_pos;
-    size_t arr_pos;
-    
-}

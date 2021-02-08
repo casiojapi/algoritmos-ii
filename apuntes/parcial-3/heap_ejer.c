@@ -41,3 +41,43 @@ int* k_merge(int** arr, size_t k, size_t h) {
     heap_destruir(minimos, NULL);
     return res;
 } // O ((h + k) * (log k))
+
+void** tres_mas_grandes(heap_t* heap) {
+    void** res = malloc(sizeof(void*) * 3);
+    if (res == NULL) return NULL;
+    
+    res[0] = heap->arreglo[0];
+    void* h_izq = heap->arreglo[1];
+    void* h_der = heap->arreglo[2];
+    if (heap->cmp(h_izq, h_der) > 0) {
+        res[1] = h_izq;
+        if (heap->cmp(heap->arreglo[3], heap->arreglo[4]) > 0) {
+            if (heap->cmp(heap->arreglo[3], h_der) > 0)
+                res[2] = heap->arreglo[3];
+            else
+                res[2] = h_der;
+        }
+        else {
+            if (heap->cmp(heap->arreglo[4], h_der) > 0)
+                res[2] = heap->arreglo[4];
+            else
+                res[2] = h_der;
+        }
+    }
+    else {
+        res[1] = h_der;
+        if (heap->cmp(heap->arreglo[5], heap->arreglo[6]) > 0) {
+            if (heap->cmp(heap->arreglo[5], h_izq) > 0)
+                res[2] = heap->arreglo[5];
+            else
+                res[2] = h_izq;
+        }
+        else {
+            if (heap->cmp(heap->arreglo[6], h_izq) > 0)
+                res[2] = heap->arreglo[6];
+            else
+                res[2] = h_izq;
+        }
+    }
+    return res;
+}

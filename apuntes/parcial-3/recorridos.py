@@ -16,7 +16,7 @@ def bfs(grafo, origen):
                 orden[w] = orden[v] + 1
                 q.encolar(w)
     return padres, orden
-
+# Os -> PARA CADA VERTICE VOY A RECORRER TODOS SUS ADYACENTES. O(V + E)
 
 # dfs
 
