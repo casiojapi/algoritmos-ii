@@ -41,6 +41,26 @@ size_t altura(const ab_t* ab) {
         return 0;
     return max(altura(ab->izq), altura(ab->der)) + 1;
 }
+
+int iguales(int a, int b) {
+    return a == b ? a: -1;
+}
+
+int ab_altura(const ab_t* ab) {
+    if (!ab) return 0;
+    int izq = ab_altura(ab->izq);
+    int der = ab_altura(ab->der);
+    int a = iguales(izq, der);
+    if (a == -1)
+        return -1;
+    else
+        return der + 1;
+}
+bool ab_completo(ab_t* ab) {
+    if (ab_altura(ab) == -1)
+        return false
+    return true;
+}
 // O(n)
 
 bool arboles_iguales(ab_t* ab_1, ab_t* ab_2) {

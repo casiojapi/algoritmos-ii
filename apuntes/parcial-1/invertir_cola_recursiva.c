@@ -16,7 +16,7 @@ void cola_invertir(cola_t *cola)
     cola->ult = cola->prim;
     while (actual)
     {
-        acutal->sig = anterior;
+        actual->sig = anterior;
         anterior = actual;
         actual = siguiente;
         siguiente = actual ? actual->sig : NULL;

@@ -40,7 +40,7 @@ int* k_merge(int** arr, size_t k, size_t h) {
     }
     heap_destruir(minimos, NULL);
     return res;
-} // O ((h + k) * (log k))
+} // O ((h + k) * (log k)) 
 
 void** tres_mas_grandes(heap_t* heap) {
     void** res = malloc(sizeof(void*) * 3);
