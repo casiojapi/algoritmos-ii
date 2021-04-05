@@ -1,0 +1,42 @@
+Prueba 01a... OK.
+
+Valgrind:
+
+Prueba 01b... OK.
+
+Valgrind:
+
+Prueba 02... OK.
+
+Valgrind:
+
+Prueba 03... OK.
+
+Valgrind:
+
+Prueba 04... OK.
+
+Valgrind:
+
+Prueba 05... OK.
+
+Valgrind:
+
+Prueba 06... output incorrecto:
+
+--- 06_cátedra
++++ 06_estudiante
+@@ -56,7 +56,7 @@
+ 26 paciente(s) en espera para Especialidad 001B
+ Se atiende a Paciente Z
+ 25 paciente(s) en espera para Especialidad 001B
+-3622 doctor(es) en el sistema
++3621 doctor(es) en el sistema
+ 1: Dr N.º 000100, especialidad Especialidad 4336, 0 paciente(s) atendido(s)
+ 2: Dr N.º 000101, especialidad Especialidad 3FA8, 0 paciente(s) atendido(s)
+ 3: Dr N.º 000102, especialidad Especialidad 4B58, 0 paciente(s) atendido(s)
+@@ -3678,4 +3678,3 @@
+ 3619: Dr N.º 003718, especialidad Especialidad 0292, 0 paciente(s) atendido(s)
+ 3620: Dr N.º 003719, especialidad Especialidad 3235, 0 paciente(s) atendido(s)
+ 3621: Dr N.º 003720, especialidad Especialidad 0E6C, 0 paciente(s) atendido(s)
+-3622: Dr N.º 003721, especialidad Especialidad 02FE, 0 paciente(s) atendido(s)

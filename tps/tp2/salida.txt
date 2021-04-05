@@ -1,0 +1,1 @@
+-bash: ./pruebas.sh: No such file or directory
